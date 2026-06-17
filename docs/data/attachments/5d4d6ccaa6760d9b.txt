@@ -1,0 +1,3 @@
+Result count: 169 loaded.
+Search "Pad" (partial): 169 loaded.
+PASS: Partial search works

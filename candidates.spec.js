@@ -1,7 +1,7 @@
 // ============================================================
 // NxtHire.ai – Candidates Page Test Suite
 // Tool: Playwright  |  Target: nxthire.ai/candidates
-// Version: 2.0  |  Date: June 2026
+// Version: 2.1  |  Date: June 2026
 // Tester: Japendra  |  North Star Group Inc.
 // Run:  npx playwright test candidates.spec.js --headed
 // Credentials: stored in .env file — never hardcode passwords
@@ -339,8 +339,9 @@ test.describe('TC-11-D View Candidate Profile', () => {
 
   test('Candidate profile shows key details', async ({ page }) => {
     const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
-    await viewBtn.click();
-    await page.waitForTimeout(3000);
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click({ force: true });
+    await page.waitForTimeout(5000);
     const body = await page.locator('body').innerText();
     expect(body.length).toBeGreaterThan(100);
     console.log(`Profile content length: ${body.length} chars`);
@@ -349,8 +350,9 @@ test.describe('TC-11-D View Candidate Profile', () => {
 
   test('Back navigation returns to candidates list', async ({ page }) => {
     const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
-    await viewBtn.click();
-    await page.waitForTimeout(2000);
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click({ force: true });
+    await page.waitForTimeout(3000);
     await page.goBack();
     await page.waitForTimeout(2000);
     const url = page.url();
@@ -404,14 +406,19 @@ test.describe('TC-11-F Bulk Import', () => {
 
 // ─────────────────────────────────────────────────────────────
 // TC-11-G — Ask Agent
+// FIX v2.1: Use waitFor + force click to handle Firefox timing
 // ─────────────────────────────────────────────────────────────
 test.describe('TC-11-G Ask Agent', () => {
 
   test('Ask agent navigates to AI Recruiter chat', async ({ page }) => {
     await login(page);
     await goToCandidates(page);
-    await page.click('button:has-text("Ask agent")');
-    await page.waitForTimeout(3000);
+    // Wait for button to be fully ready then force click for Firefox
+    const askBtn = page.locator('button:has-text("Ask agent")').first();
+    await askBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await page.waitForTimeout(2000);
+    await askBtn.click({ force: true });
+    await page.waitForTimeout(5000);
     const url = page.url();
     const chatVisible = await page.locator('textarea, input[placeholder*="Ask the agent"]').isVisible().catch(() => false);
     console.log(`URL: ${url} | Chat visible: ${chatVisible}`);

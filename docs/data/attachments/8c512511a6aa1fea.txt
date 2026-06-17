@@ -1,0 +1,2 @@
+Profile content length: 1932 chars
+PASS: Candidate profile has content
