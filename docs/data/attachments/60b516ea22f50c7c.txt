@@ -1,0 +1,3 @@
+View matches clicked via JS: false
+URL after View matches: https://nxthire.ai/jobs
+Navigated to candidates with job filter: false

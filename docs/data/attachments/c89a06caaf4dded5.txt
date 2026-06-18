@@ -1,0 +1,2 @@
+Top match % visible: true
+PASS: Top match percentage visible

@@ -1,0 +1,2 @@
+Requisitions text found: true
+PASS: Open Jobs page loaded with requisitions

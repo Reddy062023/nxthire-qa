@@ -1,0 +1,5 @@
+DEFERRED: Requires active Anthropic API credits
+DEFERRED: Paste JD text → click Parse with Claude
+DEFERRED: Verify Claude extracts title, location, skills, comp, work type
+DEFERRED: Verify extracted fields appear on right panel
+DEFERRED: Save requisition and verify it appears in jobs list as active

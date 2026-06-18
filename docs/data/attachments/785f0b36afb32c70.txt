@@ -1,0 +1,3 @@
+Status options visible: false
+NOTE: Status change (active → closed) confirms position filled flow
+NOTE: When status changes to closed — active reqs count decreases by 1
