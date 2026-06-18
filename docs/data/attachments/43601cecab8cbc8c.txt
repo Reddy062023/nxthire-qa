@@ -1,0 +1,2 @@
+North Star visible: true | Location visible: false
+PASS: Job card shows company and location

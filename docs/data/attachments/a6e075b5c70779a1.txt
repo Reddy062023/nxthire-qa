@@ -1,0 +1,3 @@
+URL: https://nxthire.ai/dashboard | Chat visible: true
+PASS: Ask agent opens AI Recruiter chat
+NOTE: No candidate context passed from Candidates page — reported to Sundar

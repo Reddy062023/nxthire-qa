@@ -1,0 +1,3 @@
+URL after bulk import: https://nxthire.ai/candidates
+Modal/dialog detected: false
+NOTE: Manual test confirmed modal opens correctly but upload fails with CORS error

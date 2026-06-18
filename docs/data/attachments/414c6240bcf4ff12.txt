@@ -1,0 +1,3 @@
+Source filter options: All sources (2,232), Ceipal (2232)
+Ceipal option present: true
+PASS: Ceipal option in source filter

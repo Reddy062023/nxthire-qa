@@ -1,0 +1,2 @@
+Page title found: true
+PASS: Page title visible

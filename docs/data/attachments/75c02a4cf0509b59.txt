@@ -1,0 +1,3 @@
+Result count: 0 loaded.
+Search "abc123xyz": 0 loaded. | No results: true
+PASS: Nonsense search correctly returned no results

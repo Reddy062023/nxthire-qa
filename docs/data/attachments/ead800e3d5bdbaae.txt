@@ -1,0 +1,5 @@
+Result count: 21 loaded.
+After search "Padma": 21 loaded.
+Result count: 20 loaded.
+After search + Ceipal filter: 20 loaded.
+PASS: Combined search and filter works

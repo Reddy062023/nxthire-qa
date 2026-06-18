@@ -1,0 +1,2 @@
+URL after New requisition: https://nxthire.ai/jobs/new
+PASS: New requisition navigates to /jobs/new

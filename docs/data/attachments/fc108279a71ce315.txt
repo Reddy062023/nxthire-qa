@@ -1,0 +1,3 @@
+URL after Import CSV: https://nxthire.ai/jobs/new
+Navigated to import page: true
+NOTE: Import CSV opens the new requisition / import interface

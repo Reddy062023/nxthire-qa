@@ -1,0 +1,2 @@
+Active reqs: true | Time-to-fill: true | Pipeline value: true
+PASS: Stats cards visible

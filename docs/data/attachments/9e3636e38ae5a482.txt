@@ -1,0 +1,6 @@
+Result count: 21 loaded.
+Search "PADMA": 21 loaded.
+Result count: 21 loaded.
+Search "padma": 21 loaded.
+Case sensitivity: PADMA=21 loaded. padma=21 loaded.
+PASS: Search is case insensitive

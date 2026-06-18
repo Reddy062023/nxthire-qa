@@ -1,0 +1,2 @@
+Candidates: true | Applications: false
+PASS: Candidates and Applications counts visible

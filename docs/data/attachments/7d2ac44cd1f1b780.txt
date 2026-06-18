@@ -1,0 +1,2 @@
+JD text area visible: true
+PASS: JD text area present on new requisition form

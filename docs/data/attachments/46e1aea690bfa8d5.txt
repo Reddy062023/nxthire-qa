@@ -1,0 +1,1 @@
+North Star visible: false | Location visible: false

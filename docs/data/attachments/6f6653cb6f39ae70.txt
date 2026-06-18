@@ -1,0 +1,2 @@
+URL after Cancel: https://nxthire.ai/jobs
+PASS: Cancel returns to jobs list

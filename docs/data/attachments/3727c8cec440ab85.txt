@@ -1,0 +1,3 @@
+Parse with Claude button visible: true
+PASS: Parse with Claude button present
+NOTE: This button requires active Anthropic API credits — deferred to Phase 2
