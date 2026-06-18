@@ -1,0 +1,2 @@
+Status dropdown visible: true
+NOTE: Status change (active → closed) confirms position filled flow

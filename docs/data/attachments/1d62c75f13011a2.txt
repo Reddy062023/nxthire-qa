@@ -1,0 +1,1 @@
+NOTE: Download event not captured by script — manual test confirmed export works

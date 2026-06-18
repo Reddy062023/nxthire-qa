@@ -1,0 +1,4 @@
+Found Ceipal in select 3
+Result count: 1,000 of 80,534 loaded.
+After Ceipal filter: 1,000 of 80,534 loaded.
+PASS: Ceipal filter applied

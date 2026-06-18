@@ -8,13 +8,12 @@ module.exports = defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['list'],
-    ['allure-playwright', { 
-  outputFolder: 'allure-results',
-  suiteTitle: false,
-  detail: false,
-  outputFolder: 'allure-results',
-  duplicateRemovedOn: 'retry'
-}]
+    ['allure-playwright', {
+      outputFolder:        'allure-results',
+      suiteTitle:          false,
+      detail:              false,
+      duplicateRemovedOn:  'retry',
+    }]
   ],
   use: {
     baseURL:    'https://nxthire.ai',

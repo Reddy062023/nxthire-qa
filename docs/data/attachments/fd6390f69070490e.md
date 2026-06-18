@@ -1,0 +1,193 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: candidates.spec.js >> TC-11-B Search Scenarios >> Search partial name — Pad — returns results
+- Location: candidates.spec.js:160:3
+
+# Error details
+
+```
+TimeoutError: page.waitForURL: Timeout 60000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/dashboard" until "load"
+============================================================
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e14]: NxtHire.ai
+    - generic [ref=e15]:
+      - generic [ref=e16]: Recruiting on autopilot, with the world's best LLM.
+      - generic [ref=e17]: Source candidates across LinkedIn, Indeed, Monster and your private resume DB. Apply to matching jobs in one click.
+    - generic [ref=e18]: v0.4.2 · trusted by 240+ agencies
+  - generic [ref=e20]:
+    - generic [ref=e21]: Welcome back
+    - generic [ref=e22]: Sign in to your agency workspace.
+    - generic [ref=e23]:
+      - button "Recruiter" [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+        - text: Recruiter
+      - button "Job seeker" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - text: Job seeker
+    - generic [ref=e32]:
+      - generic [ref=e33]: Work email
+      - textbox [ref=e34]: vish@premiertalent.com
+    - generic [ref=e35]:
+      - generic [ref=e36]: Password
+      - textbox [ref=e37]: password123
+    - generic [ref=e38]: NetworkError when attempting to fetch resource.
+    - button "Continue" [ref=e39] [cursor=pointer]:
+      - text: Continue
+      - img [ref=e40]
+    - generic [ref=e43]:
+      - text: New agency?
+      - link "Sign up" [ref=e44] [cursor=pointer]:
+        - /url: /register-agency
+      - text: · 14-day free trial
+    - generic [ref=e45]:
+      - text: Job seeker?
+      - link "Register your resume" [ref=e46] [cursor=pointer]:
+        - /url: /seeker-register
+```
+
+# Test source
+
+```ts
+  1   | // ============================================================
+  2   | // NxtHire.ai – Candidates Page Test Suite
+  3   | // Tool: Playwright  |  Target: nxthire.ai/candidates
+  4   | // Version: 2.1  |  Date: June 2026
+  5   | // Tester: Japendra  |  North Star Group Inc.
+  6   | // Run:  npx playwright test candidates.spec.js --headed
+  7   | // Credentials: stored in .env file — never hardcode passwords
+  8   | // ============================================================
+  9   | 
+  10  | require('dotenv').config();
+  11  | const { test, expect } = require('@playwright/test');
+  12  | 
+  13  | const BASE_URL = 'https://nxthire.ai';
+  14  | const CREDS = {
+  15  |   email:    process.env.NXTHIRE_EMAIL,
+  16  |   password: process.env.NXTHIRE_PASSWORD,
+  17  | };
+  18  | 
+  19  | // ── Login helper ──────────────────────────────────────────────
+  20  | async function login(page) {
+  21  |   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
+  22  |   await page.fill('input[type="email"]',    CREDS.email);
+  23  |   await page.fill('input[type="password"]', CREDS.password);
+  24  |   await page.click('button[type="submit"]');
+> 25  |   await page.waitForURL('**/dashboard', { timeout: 60000 });
+      |              ^ TimeoutError: page.waitForURL: Timeout 60000ms exceeded.
+  26  | }
+  27  | 
+  28  | // ── Navigate to Candidates page ───────────────────────────────
+  29  | async function goToCandidates(page) {
+  30  |   await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
+  31  |   await page.waitForTimeout(3000);
+  32  | }
+  33  | 
+  34  | // ── Search helper ─────────────────────────────────────────────
+  35  | async function search(page, query) {
+  36  |   const searchBox = page.locator('input[placeholder*="Search by name"]').first();
+  37  |   await searchBox.clear();
+  38  |   if (query) {
+  39  |     await searchBox.fill(query);
+  40  |   }
+  41  |   await page.waitForTimeout(3000);
+  42  | }
+  43  | 
+  44  | // ── Get result count ──────────────────────────────────────────
+  45  | async function getResultCount(page) {
+  46  |   const countText = await page.locator('text=/\\d+ (of \\d+)?loaded/').first().innerText().catch(() => '0 loaded');
+  47  |   console.log(`Result count: ${countText}`);
+  48  |   return countText;
+  49  | }
+  50  | 
+  51  | // ─────────────────────────────────────────────────────────────
+  52  | // TC-11-A — Page Load
+  53  | // ─────────────────────────────────────────────────────────────
+  54  | test.describe('TC-11-A Page Load', () => {
+  55  | 
+  56  |   test('Candidates page loads with data', async ({ page }) => {
+  57  |     await login(page);
+  58  |     await goToCandidates(page);
+  59  |     const countText = await getResultCount(page);
+  60  |     await expect(page.locator('text=/loaded/')).toBeVisible({ timeout: 10000 });
+  61  |     console.log(`PASS: Page loaded — ${countText}`);
+  62  |   });
+  63  | 
+  64  |   test('All filter dropdowns present on page', async ({ page }) => {
+  65  |     await login(page);
+  66  |     await goToCandidates(page);
+  67  |     const selects = page.locator('select');
+  68  |     const count = await selects.count();
+  69  |     console.log(`Number of filter dropdowns found: ${count}`);
+  70  |     expect(count).toBeGreaterThanOrEqual(3);
+  71  |   });
+  72  | 
+  73  |   test('Export Bulk import and Ask agent buttons present', async ({ page }) => {
+  74  |     await login(page);
+  75  |     await goToCandidates(page);
+  76  |     await expect(page.locator('button:has-text("Export")')).toBeVisible();
+  77  |     await expect(page.locator('button:has-text("Bulk import")')).toBeVisible();
+  78  |     await expect(page.locator('button:has-text("Ask agent")')).toBeVisible();
+  79  |     console.log('PASS: All action buttons present');
+  80  |   });
+  81  | 
+  82  |   test('Candidate columns present', async ({ page }) => {
+  83  |     await login(page);
+  84  |     await goToCandidates(page);
+  85  |     const body = await page.locator('body').innerText();
+  86  |     const hasCandidate = body.includes('CANDIDATE') || body.includes('Candidate');
+  87  |     const hasSkills    = body.includes('SKILLS')    || body.includes('Skills');
+  88  |     const hasSource    = body.includes('SOURCE')    || body.includes('Source');
+  89  |     console.log(`Columns — Candidate: ${hasCandidate}, Skills: ${hasSkills}, Source: ${hasSource}`);
+  90  |     expect(hasCandidate).toBe(true);
+  91  |     expect(hasSkills).toBe(true);
+  92  |     expect(hasSource).toBe(true);
+  93  |   });
+  94  | 
+  95  | });
+  96  | 
+  97  | // ─────────────────────────────────────────────────────────────
+  98  | // TC-11-B — Search Scenarios
+  99  | // ─────────────────────────────────────────────────────────────
+  100 | test.describe('TC-11-B Search Scenarios', () => {
+  101 | 
+  102 |   test.beforeEach(async ({ page }) => {
+  103 |     await login(page);
+  104 |     await goToCandidates(page);
+  105 |   });
+  106 | 
+  107 |   test('Search by name — Padma — returns results', async ({ page }) => {
+  108 |     await search(page, 'Padma');
+  109 |     const countText = await getResultCount(page);
+  110 |     const noResults = await page.locator('text=No candidates match').isVisible().catch(() => false);
+  111 |     console.log(`Search "Padma": ${countText} | No results: ${noResults}`);
+  112 |     expect(noResults).toBe(false);
+  113 |   });
+  114 | 
+  115 |   test('Search by skill — Java — returns results', async ({ page }) => {
+  116 |     await search(page, 'Java');
+  117 |     const countText = await getResultCount(page);
+  118 |     const noResults = await page.locator('text=No candidates match').isVisible().catch(() => false);
+  119 |     console.log(`Search "Java": ${countText} | No results: ${noResults}`);
+  120 |     if (noResults) {
+  121 |       console.log('FINDING: Skill search returned 0 — investigate');
+  122 |     } else {
+  123 |       console.log('PASS: Skill search returned results');
+  124 |     }
+  125 |   });
+```

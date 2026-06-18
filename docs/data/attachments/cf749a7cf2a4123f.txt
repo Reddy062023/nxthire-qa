@@ -1,0 +1,10 @@
+Total select dropdowns: 6
+Select 0 options: All locations, Texas (12,939), California (6,161), New Jersey (5,313), Florida (4,768)
+Select 1 options: All experience
+Select 2 options: All statuses (503), applied (500), sourced (3)
+Select 3 options: All sources (80,534), Ceipal (80531), Local DB (3)
+Select 4 options: Sort: best match
+Select 5 options: 100, 250, 500, 1000
+Location options available: 101
+Result count: 1,000 of 80,534 loaded.
+After location filter: 1,000 of 80,534 loaded.

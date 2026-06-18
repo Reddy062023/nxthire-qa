@@ -1,0 +1,3 @@
+Result count: 502 of 80,533 loaded.
+Default count: 502 of 80,533 loaded.
+PASS: Correct total candidate count shown

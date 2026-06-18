@@ -1,0 +1,3 @@
+Per page dropdown visible: true
+Per page options: 100, 250, 500, 1000
+NOTE: Pagination used — 162 pages with 500 per page. Options: 100/250/500/1000
