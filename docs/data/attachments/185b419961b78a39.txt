@@ -1,0 +1,4 @@
+View matches clicked via JS: true
+URL after View matches: https://nxthire.ai/candidates?job=01KSKN04B8K3JWM4CWC27HTG18
+Navigated to candidates with job filter: true
+PASS: View matches navigates to candidate matches filtered by job

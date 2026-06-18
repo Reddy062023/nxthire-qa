@@ -1,0 +1,3 @@
+Result count: 1,000 loaded.
+Search "Java": 1,000 loaded. | No results: false
+PASS: Skill search returned results

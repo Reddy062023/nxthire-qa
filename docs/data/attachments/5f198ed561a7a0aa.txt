@@ -1,0 +1,4 @@
+DEFERRED: After Parse with Claude saves the job
+DEFERRED: Verify new job appears in Open Jobs list
+DEFERRED: Verify status shows as active
+DEFERRED: Verify active reqs count increases by 1

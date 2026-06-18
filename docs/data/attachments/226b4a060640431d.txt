@@ -1,0 +1,3 @@
+Result count: 11 loaded.
+Search "Publicis Sapient": 11 loaded. | No results: false
+PASS: Company search returned results

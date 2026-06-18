@@ -1,0 +1,2 @@
+Active: true | Closed: false | Ceipal badge: true
+PASS: Status badges visible on job cards

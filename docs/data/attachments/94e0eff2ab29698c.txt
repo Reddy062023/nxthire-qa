@@ -1,0 +1,2 @@
+Posted date visible: true
+PASS: Posted date visible on job cards

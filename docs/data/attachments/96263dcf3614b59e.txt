@@ -1,0 +1,5 @@
+Result count: 1,000 of 80,534 loaded.
+After filter: 1,000 of 80,534 loaded.
+Result count: 503 of 80,534 loaded.
+After reset: 503 of 80,534 loaded.
+PASS: Filter reset works

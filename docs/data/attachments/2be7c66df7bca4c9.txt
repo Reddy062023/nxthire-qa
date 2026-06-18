@@ -1,0 +1,2 @@
+All sources in select options: true
+PASS: Default source filter shows All sources

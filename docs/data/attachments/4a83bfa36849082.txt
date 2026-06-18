@@ -1,0 +1,2 @@
+All sources text found: true
+PASS: Default source filter shows All sources

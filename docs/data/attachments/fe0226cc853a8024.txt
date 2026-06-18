@@ -1,0 +1,3 @@
+Result count: 1,000 loaded.
+Search single char "P": 1,000 loaded.
+No results: false

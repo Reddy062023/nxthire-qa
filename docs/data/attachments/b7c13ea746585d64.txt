@@ -1,0 +1,2 @@
+Active badge: true | Closed badge: true
+PASS: Status badges visible on job cards

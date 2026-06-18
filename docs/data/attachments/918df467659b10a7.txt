@@ -1,0 +1,2 @@
+Active reqs count visible: true
+PASS: Active reqs count shown in stats card

@@ -1,0 +1,193 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: openjobs.spec.js >> TC-12-B Source Filter >> Source filter has Ceipal option
+- Location: openjobs.spec.js:104:3
+
+# Error details
+
+```
+TimeoutError: page.waitForURL: Timeout 60000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/dashboard" until "load"
+============================================================
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e10]: NxtHire.ai
+    - generic [ref=e11]:
+      - generic [ref=e12]: Recruiting on autopilot, with the world's best LLM.
+      - generic [ref=e13]: Source candidates across LinkedIn, Indeed, Monster and your private resume DB. Apply to matching jobs in one click.
+    - generic [ref=e14]: v0.4.2 · trusted by 240+ agencies
+  - generic [ref=e16]:
+    - generic [ref=e17]: Welcome back
+    - generic [ref=e18]: Sign in to your agency workspace.
+    - generic [ref=e19]:
+      - button "Recruiter" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - text: Recruiter
+      - button "Job seeker" [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+        - text: Job seeker
+    - generic [ref=e28]:
+      - generic [ref=e29]: Work email
+      - textbox [ref=e30]: vish@premiertalent.com
+    - generic [ref=e31]:
+      - generic [ref=e32]: Password
+      - textbox [ref=e33]: password123
+    - generic [ref=e34]: Failed to fetch
+    - button "Continue" [ref=e35] [cursor=pointer]:
+      - text: Continue
+      - img [ref=e36]
+    - generic [ref=e38]:
+      - text: New agency?
+      - link "Sign up" [ref=e39] [cursor=pointer]:
+        - /url: /register-agency
+      - text: · 14-day free trial
+    - generic [ref=e40]:
+      - text: Job seeker?
+      - link "Register your resume" [ref=e41] [cursor=pointer]:
+        - /url: /seeker-register
+```
+
+# Test source
+
+```ts
+  1   | // ============================================================
+  2   | // NxtHire.ai – Open Jobs Module Test Suite
+  3   | // Tool: Playwright  |  Target: nxthire.ai/jobs
+  4   | // Version: 1.0  |  Date: June 2026
+  5   | // Tester: QA — North Star Group Inc.
+  6   | // Run:  npx playwright test openjobs.spec.js --headed
+  7   | // Credentials: stored in .env file — never hardcode passwords
+  8   | // ============================================================
+  9   | 
+  10  | require('dotenv').config();
+  11  | const { test, expect } = require('@playwright/test');
+  12  | 
+  13  | const BASE_URL = 'https://nxthire.ai';
+  14  | const CREDS = {
+  15  |   email:    process.env.NXTHIRE_EMAIL,
+  16  |   password: process.env.NXTHIRE_PASSWORD,
+  17  | };
+  18  | 
+  19  | // ── Login helper ──────────────────────────────────────────────
+  20  | async function login(page) {
+  21  |   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
+  22  |   await page.fill('input[type="email"]',    CREDS.email);
+  23  |   await page.fill('input[type="password"]', CREDS.password);
+  24  |   await page.click('button[type="submit"]');
+> 25  |   await page.waitForURL('**/dashboard', { timeout: 60000 });
+      |              ^ TimeoutError: page.waitForURL: Timeout 60000ms exceeded.
+  26  | }
+  27  | 
+  28  | // ── Navigate to Open Jobs page ────────────────────────────────
+  29  | async function goToJobs(page) {
+  30  |   await page.goto(`${BASE_URL}/jobs`, { timeout: 60000 });
+  31  |   await page.waitForTimeout(3000);
+  32  | }
+  33  | 
+  34  | // ─────────────────────────────────────────────────────────────
+  35  | // TC-12-A — Page Load
+  36  | // ─────────────────────────────────────────────────────────────
+  37  | test.describe('TC-12-A Page Load', () => {
+  38  | 
+  39  |   test('Open Jobs page loads with requisitions', async ({ page }) => {
+  40  |     await login(page);
+  41  |     await goToJobs(page);
+  42  |     const countText = await page.locator('text=/\\d+ of \\d+ active requisitions loaded/').first().innerText().catch(() => '');
+  43  |     console.log(`Requisitions count: ${countText}`);
+  44  |     await expect(page.locator('text=/active requisitions loaded/')).toBeVisible({ timeout: 10000 });
+  45  |     console.log('PASS: Open Jobs page loaded with requisitions');
+  46  |   });
+  47  | 
+  48  |   test('Page title shows Open jobs', async ({ page }) => {
+  49  |     await login(page);
+  50  |     await goToJobs(page);
+  51  |     await expect(page.locator('h1, text=Open jobs').first()).toBeVisible();
+  52  |     console.log('PASS: Page title visible');
+  53  |   });
+  54  | 
+  55  |   test('Import CSV and New requisition buttons present', async ({ page }) => {
+  56  |     await login(page);
+  57  |     await goToJobs(page);
+  58  |     await expect(page.locator('button:has-text("Import CSV"), a:has-text("Import CSV")').first()).toBeVisible();
+  59  |     await expect(page.locator('button:has-text("New requisition"), a:has-text("New requisition")').first()).toBeVisible();
+  60  |     console.log('PASS: Import CSV and New requisition buttons present');
+  61  |   });
+  62  | 
+  63  |   test('Stats cards visible — Active reqs, Avg time-to-fill, Pipeline value', async ({ page }) => {
+  64  |     await login(page);
+  65  |     await goToJobs(page);
+  66  |     const body = await page.locator('body').innerText();
+  67  |     const hasActiveReqs    = body.includes('Active reqs') || body.includes('active reqs');
+  68  |     const hasTimeToFill    = body.includes('time-to-fill') || body.includes('Time-to-fill');
+  69  |     const hasPipelineValue = body.includes('Pipeline value') || body.includes('pipeline value');
+  70  |     console.log(`Active reqs: ${hasActiveReqs} | Time-to-fill: ${hasTimeToFill} | Pipeline value: ${hasPipelineValue}`);
+  71  |     expect(hasActiveReqs).toBe(true);
+  72  |     console.log('PASS: Stats cards visible');
+  73  |   });
+  74  | 
+  75  |   test('Source filter dropdown present', async ({ page }) => {
+  76  |     await login(page);
+  77  |     await goToJobs(page);
+  78  |     const sourceFilter = page.locator('text=/All sources/').first();
+  79  |     const visible = await sourceFilter.isVisible().catch(() => false);
+  80  |     console.log(`Source filter visible: ${visible}`);
+  81  |     expect(visible).toBe(true);
+  82  |     console.log('PASS: Source filter present');
+  83  |   });
+  84  | 
+  85  | });
+  86  | 
+  87  | // ─────────────────────────────────────────────────────────────
+  88  | // TC-12-B — Source Filter
+  89  | // ─────────────────────────────────────────────────────────────
+  90  | test.describe('TC-12-B Source Filter', () => {
+  91  | 
+  92  |   test.beforeEach(async ({ page }) => {
+  93  |     await login(page);
+  94  |     await goToJobs(page);
+  95  |   });
+  96  | 
+  97  |   test('Default shows All sources with total count', async ({ page }) => {
+  98  |     const sourceText = await page.locator('text=/All sources/').first().innerText().catch(() => '');
+  99  |     console.log(`Default source filter: ${sourceText}`);
+  100 |     expect(sourceText).toContain('All sources');
+  101 |     console.log('PASS: Default source filter shows All sources');
+  102 |   });
+  103 | 
+  104 |   test('Source filter has Ceipal option', async ({ page }) => {
+  105 |     const sourceDropdown = page.locator('text=/All sources/').first();
+  106 |     await sourceDropdown.click();
+  107 |     await page.waitForTimeout(1000);
+  108 |     const hasCeipal = await page.locator('text=Ceipal').first().isVisible().catch(() => false);
+  109 |     console.log(`Ceipal option visible: ${hasCeipal}`);
+  110 |     expect(hasCeipal).toBe(true);
+  111 |     console.log('PASS: Ceipal option in source filter');
+  112 |   });
+  113 | 
+  114 |   test('Selecting Ceipal filters jobs correctly', async ({ page }) => {
+  115 |     const sourceDropdown = page.locator('text=/All sources/').first();
+  116 |     await sourceDropdown.click();
+  117 |     await page.waitForTimeout(1000);
+  118 |     const ceipalOption = page.locator('text=Ceipal').first();
+  119 |     if (await ceipalOption.isVisible()) {
+  120 |       await ceipalOption.click();
+  121 |       await page.waitForTimeout(3000);
+  122 |       const countText = await page.locator('text=/\\d+ of \\d+ active requisitions loaded/').first().innerText().catch(() => '');
+  123 |       console.log(`After Ceipal filter: ${countText}`);
+  124 |       console.log('PASS: Ceipal filter applied');
+  125 |     }
+```

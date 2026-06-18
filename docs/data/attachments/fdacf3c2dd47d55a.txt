@@ -1,0 +1,3 @@
+Result count: 500 of 80,534 loaded.
+After clear: 500 of 80,534 loaded.
+PASS: Clear search restored all candidates

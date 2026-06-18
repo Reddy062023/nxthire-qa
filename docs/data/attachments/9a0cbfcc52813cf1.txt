@@ -1,0 +1,2 @@
+Experience filter at index 1: All experience
+FINDING: Experience filter has only 1 option — no ranges configured

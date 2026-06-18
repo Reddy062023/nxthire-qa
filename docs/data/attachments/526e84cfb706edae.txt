@@ -1,0 +1,2 @@
+Total requisition count visible: true
+PASS: Total requisition count shown correctly

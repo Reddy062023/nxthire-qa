@@ -1,0 +1,3 @@
+Status filter at index 2: All statuses (502), applied (500), sourced (2)
+Result count: 502 of 80,533 loaded.
+After status filter: 502 of 80,533 loaded.

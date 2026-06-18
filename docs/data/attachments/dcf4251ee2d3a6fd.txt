@@ -1,0 +1,2 @@
+URL after back: https://nxthire.ai/candidates
+PASS: Back navigation works

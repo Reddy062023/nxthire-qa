@@ -1,0 +1,3 @@
+URL after View: https://nxthire.ai/candidates/01KSRM2ENQETPH10RRB7WX2J54
+Profile page opened: true
+PASS: View button opens candidate profile

@@ -1,0 +1,5 @@
+DEFERRED: After job is created and candidate is submitted
+DEFERRED: Change job status from active to closed
+DEFERRED: Verify status badge changes to closed
+DEFERRED: Verify active reqs count decreases by 1
+DEFERRED: This simulates the real-world position filled workflow

@@ -1,0 +1,3 @@
+Sort control visible: false
+Sort select found at index 4: Sort: best match
+PASS: Sort control found and has options
