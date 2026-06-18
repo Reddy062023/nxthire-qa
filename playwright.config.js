@@ -18,7 +18,7 @@ module.exports = defineConfig({
   ],
   use: {
     baseURL:    'https://nxthire.ai',
-    headless:   false,
+    headless:   true,
     slowMo:     100,
     screenshot: 'only-on-failure',
     video:      'retain-on-failure',
