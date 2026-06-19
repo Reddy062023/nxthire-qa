@@ -16,7 +16,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90   # increased from 60 — full suite takes ~40 min on CI
 
     steps:
       # Step 1 — Check out the code
@@ -40,7 +40,7 @@ jobs:
 
       # Step 5 — Install Allure CLI
       - name: Install Allure CLI
-        run: npm install -g allure-commandline --save-dev
+        run: npm install -g allure-commandline
 
       # Step 6 — Run all test suites
       - name: Run Playwright tests
@@ -52,15 +52,15 @@ jobs:
 
       # Step 7 — Generate Allure report
       - name: Generate Allure report
-        run: allure generate allure-results --clean -o allure-report
         if: always()
+        run: allure generate allure-results --clean -o allure-report
 
       # Step 8 — Copy Allure report to docs folder for GitHub Pages
       - name: Copy report to docs
+        if: always()
         run: |
           rm -rf docs
           cp -r allure-report docs
-        if: always()
 
       # Step 9 — Commit and push the updated report to GitHub Pages
       - name: Deploy Allure report to GitHub Pages
@@ -74,8 +74,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 10 — Upload test results as artifact (viewable in GitHub Actions)
-      - name: Upload Playwright test results
+      # Step 10 — Upload test results as artifact
+      - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:

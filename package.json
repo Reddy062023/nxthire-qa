@@ -1,13 +1,18 @@
 {
   "name": "nxthire-tests",
   "version": "1.0.0",
-  "description": "",
+  "description": "NxtHire.ai QA Automation Suite — North Star Group Inc.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test ai-recruiter.spec.js candidates.spec.js openjobs.spec.js datasources.spec.js",
+    "test:ai": "playwright test ai-recruiter.spec.js",
+    "test:candidates": "playwright test candidates.spec.js",
+    "test:jobs": "playwright test openjobs.spec.js",
+    "test:sources": "playwright test datasources.spec.js",
+    "report": "allure generate allure-results --clean -o allure-report"
   },
   "keywords": [],
-  "author": "",
+  "author": "North Star Group Inc.",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
