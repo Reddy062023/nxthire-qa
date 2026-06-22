@@ -1,30 +1,20 @@
-const { defineConfig } = require('@playwright/test');
+import { defineConfig, devices } from '@playwright/test';
 
-module.exports = defineConfig({
-  testDir:   '.',
-  timeout:   120000,
-  retries:   2,
-  workers:   1,
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['list'],
-    ['allure-playwright', {
-      outputFolder:        'allure-results',
-      suiteTitle:          false,
-      detail:              false,
-      duplicateRemovedOn:  'retry',
-    }]
-  ],
+export default defineConfig({
+  testDir: './tests',
+  timeout: 60000,
+  retries: 1,
+  reporter: [['list'], ['allure-playwright']],
   use: {
-    baseURL:    'https://nxthire.ai',
-    headless:   true,
-    slowMo:     100,
+    baseURL: 'https://app.nxthire.ai',
+    headless: true,
     screenshot: 'only-on-failure',
-    video:      'retain-on-failure',
-    trace:      'on-first-retry',
+    video: 'retain-on-failure',
   },
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
-    
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });
