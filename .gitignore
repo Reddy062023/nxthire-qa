@@ -4,3 +4,4 @@ playwright-report/
 allure-results/
 allure-report/
 test-results/
+audit-output/
