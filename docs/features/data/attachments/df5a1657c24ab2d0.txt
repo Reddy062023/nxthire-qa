@@ -1,0 +1,5 @@
+[login] on login page: https://nxthire.ai/login
+[login] email configured: NO — NXTHIRE_EMAIL is empty!
+[login] password configured: NO — NXTHIRE_PASSWORD is empty!
+[login] after submit, url: https://nxthire.ai/login
+[login] STILL ON LOGIN PAGE after submit — credentials likely rejected or form fields mismatched.

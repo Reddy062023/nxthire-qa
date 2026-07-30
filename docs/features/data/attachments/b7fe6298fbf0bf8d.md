@@ -1,0 +1,231 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tests/features.spec.js >> Feature 7 — Jobs: Templates, Assignment, On-Hold >> TC-F07-02: Save as template works and appears in "Start from template" list
+- Location: tests/features.spec.js:582:3
+
+# Error details
+
+```
+Error: Login failed: still on login/landing page after submitting credentials. Check NXTHIRE_EMAIL/NXTHIRE_PASSWORD secrets and login form selectors.
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e10]: NxtHire.ai
+    - generic [ref=e11]:
+      - generic [ref=e12]: Recruiting on autopilot, with the world's best LLM.
+      - generic [ref=e13]: Source candidates across LinkedIn, Indeed, Monster and your private resume DB. Apply to matching jobs in one click.
+    - generic [ref=e14]: v0.4.2 · trusted by 240+ agencies
+  - generic [ref=e16]:
+    - generic [ref=e17]: Welcome back
+    - generic [ref=e18]: Sign in to your agency workspace.
+    - generic [ref=e19]:
+      - button "Recruiter" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - text: Recruiter
+      - button "Job seeker" [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+        - text: Job seeker
+    - generic [ref=e28]:
+      - generic [ref=e29]: Work email
+      - textbox [active] [ref=e30]
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]: Password
+        - link "Forgot password?" [ref=e34] [cursor=pointer]:
+          - /url: /forgot-password
+      - textbox [ref=e35]
+    - button "Continue" [ref=e36] [cursor=pointer]:
+      - text: Continue
+      - img [ref=e37]
+    - generic [ref=e39]:
+      - text: New agency?
+      - link "Sign up" [ref=e40] [cursor=pointer]:
+        - /url: /register-agency
+      - text: · 14-day free trial
+    - generic [ref=e41]:
+      - text: Job seeker?
+      - link "Register your resume" [ref=e42] [cursor=pointer]:
+        - /url: /seeker-register
+```
+
+# Test source
+
+```ts
+  1   | // ============================================================
+  2   | // NxtHire.ai – New Features Test Suite
+  3   | // Tool: Playwright  |  Target: nxthire.ai
+  4   | // Version: 2.0  |  Date: July 2026
+  5   | // Tester: Japendra  |  North Star Group Inc.
+  6   | // Run:  npx playwright test features.spec.js --headed
+  7   | // Credentials: stored in .env file — never hardcode passwords
+  8   | //
+  9   | // CHANGELOG v1.0 -> v2.0 (based on manual QA pass, 63 TCs):
+  10  | //  - FIXED: login() waited for '**/dashboard', which does not exist.
+  11  | //    App lands on /candidates after login — this caused Features 4, 7,
+  12  | //    and 12 to time out and fail their beforeEach hook entirely.
+  13  | //  - FIXED: selectors for Edit button, Resume card, Word resume button,
+  14  | //    Duplicate check card — manual testing confirmed these elements
+  15  | //    DO exist, so v1.0's "not found" findings were false negatives
+  16  | //    caused by selectors/timing, not real product bugs.
+  17  | //  - ADDED: real assertions for bugs confirmed by manual testing, so
+  18  | //    the suite now FAILS on these until they are fixed in the app
+  19  | //    (previously the script only logged a "FINDING" and passed):
+  20  | //      * TC-F05-02: empty-email candidate creation throws a raw
+  21  | //        "Failed to fetch" error instead of a validation message
+  22  | //      * TC-F07-01: AI JD parsing returns stale/cached data
+  23  | //      * TC-F07-03: "Start from template" doesn't prefill salary
+  24  | //      * TC-F08-03: convert-to-job drops salary + sales notes
+  25  | //      * TC-F10-04 / TC-F13-04: {{recruiter_name}} placeholder not
+  26  | //        substituted in vendor sequence / hotlist emails
+  27  | //      * TC-F12-03: custom date range Apply is a no-op
+  28  | //      * TC-F14-02: creating a lead returns "401: missing bearer token"
+  29  | //  - ADDED: Feature 8 conversion flow, Feature 11 full pipeline walk,
+  30  | //    Feature 13 hotlist send, Feature 14 lead/duplicate/task/won flow.
+  31  | // ============================================================
+  32  | 
+  33  | require('dotenv').config();
+  34  | const { test, expect } = require('@playwright/test');
+  35  | 
+  36  | const BASE_URL = 'https://nxthire.ai';
+  37  | const CREDS = {
+  38  |   email:    process.env.NXTHIRE_EMAIL,
+  39  |   password: process.env.NXTHIRE_PASSWORD,
+  40  | };
+  41  | 
+  42  | // ── Login helper ──────────────────────────────────────────────
+  43  | // FIX: the app has no /dashboard route. After login it lands on
+  44  | // /candidates (confirmed across every manual test screenshot).
+  45  | // Waiting on the sidebar "Candidates" link is more robust than a
+  46  | // URL pattern in case the landing page ever changes.
+  47  | async function login(page) {
+  48  |   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
+  49  |   console.log(`[login] on login page: ${page.url()}`);
+  50  |   console.log(`[login] email configured: ${CREDS.email ? 'yes (' + CREDS.email.slice(0, 3) + '***)' : 'NO — NXTHIRE_EMAIL is empty!'}`);
+  51  |   console.log(`[login] password configured: ${CREDS.password ? 'yes' : 'NO — NXTHIRE_PASSWORD is empty!'}`);
+  52  | 
+  53  |   await page.fill('input[type="email"]', CREDS.email);
+  54  |   await page.fill('input[type="password"]', CREDS.password);
+  55  |   await page.click('button[type="submit"]');
+  56  |   await page.waitForTimeout(3000);
+  57  |   console.log(`[login] after submit, url: ${page.url()}`);
+  58  | 
+  59  |   // Verify we actually landed in the app, not still on login/marketing page.
+  60  |   const stillOnLogin = await page.locator('text=/sign in to your agency workspace/i').isVisible().catch(() => false);
+  61  |   if (stillOnLogin) {
+  62  |     console.log('[login] STILL ON LOGIN PAGE after submit — credentials likely rejected or form fields mismatched.');
+  63  |     await page.screenshot({ path: `login-failure-${Date.now()}.png` }).catch(() => {});
+> 64  |     throw new Error('Login failed: still on login/landing page after submitting credentials. Check NXTHIRE_EMAIL/NXTHIRE_PASSWORD secrets and login form selectors.');
+      |           ^ Error: Login failed: still on login/landing page after submitting credentials. Check NXTHIRE_EMAIL/NXTHIRE_PASSWORD secrets and login form selectors.
+  65  |   }
+  66  | 
+  67  |   await page.locator('text=Candidates').first().waitFor({ state: 'visible', timeout: 60000 });
+  68  |   console.log(`[login] confirmed logged in, url: ${page.url()}`);
+  69  | }
+  70  | 
+  71  | // Verifies the current page is actually authenticated app content, not a
+  72  | // bounce-back to the login/marketing page. Call this after any page.goto()
+  73  | // if session-persistence flakiness is suspected (see CHANGELOG note above).
+  74  | async function ensureLoggedIn(page) {
+  75  |   const onLoginPage = await page.locator('text=/sign in to your agency workspace/i').isVisible().catch(() => false);
+  76  |   if (onLoginPage) {
+  77  |     console.log(`[ensureLoggedIn] Bounced back to login page at ${page.url()} — re-authenticating.`);
+  78  |     await login(page);
+  79  |   }
+  80  | }
+  81  | 
+  82  | // Opens the first candidate in the list via its "View" action and
+  83  | // waits for the detail page to render. Used by many feature suites.
+  84  | async function openFirstCandidate(page) {
+  85  |   await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
+  86  |   await page.waitForTimeout(2000);
+  87  |   await ensureLoggedIn(page);
+  88  |   const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+  89  |   await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+  90  |   await viewBtn.click();
+  91  |   await page.waitForTimeout(3000);
+  92  | }
+  93  | 
+  94  | // ── Test Data ─────────────────────────────────────────────────
+  95  | const TEST_CANDIDATE = {
+  96  |   name:   'QA Test Candidate',
+  97  |   title:  'QA Engineer',
+  98  |   email:  'qatest.feature@nstartest.com',
+  99  |   phone:  '6175550199',
+  100 |   city:   'Boston',
+  101 |   state:  'MA',
+  102 |   years:  '5',
+  103 |   skills: 'Java, Python, Playwright',
+  104 | };
+  105 | 
+  106 | const NO_EMAIL_CANDIDATE = {
+  107 |   name:  'QA No Email Candidate',
+  108 |   title: 'QA Engineer',
+  109 |   years: '3',
+  110 |   skills: 'Java',
+  111 | };
+  112 | 
+  113 | const TEST_JOB = {
+  114 |   title:       'QA Automation Engineer',
+  115 |   description: 'We need a senior QA Automation Engineer with Playwright and Java experience. Must have 5+ years of experience in test automation.',
+  116 | };
+  117 | 
+  118 | const TEST_VENDOR = {
+  119 |   name:    `QA Test Vendor ${Date.now()}`,
+  120 |   email:   process.env.NXTHIRE_EMAIL,
+  121 |   contact: 'Test Contact',
+  122 | };
+  123 | 
+  124 | const TEST_COMPANY = {
+  125 |   name:    `QA Test Company ${Date.now()}`,
+  126 |   website: 'qatestcompany.com',
+  127 | };
+  128 | 
+  129 | // ─────────────────────────────────────────────────────────────
+  130 | // FEATURE 1 — Create Candidate Manually
+  131 | // ─────────────────────────────────────────────────────────────
+  132 | test.describe('Feature 1 — Create Candidate Manually', () => {
+  133 | 
+  134 |   test.beforeEach(async ({ page }) => {
+  135 |     await login(page);
+  136 |     await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
+  137 |     await page.waitForTimeout(3000);
+  138 |   });
+  139 | 
+  140 |   test('TC-F01-01: New candidate button is present on Candidates page', async ({ page }) => {
+  141 |     const newBtn = page.locator('button:has-text("New candidate")').first();
+  142 |     await expect(newBtn).toBeVisible({ timeout: 15000 });
+  143 |   });
+  144 | 
+  145 |   test('TC-F01-01: Create candidate form opens on button click', async ({ page }) => {
+  146 |     const newBtn = page.locator('button:has-text("New candidate")').first();
+  147 |     await newBtn.waitFor({ state: 'visible', timeout: 15000 });
+  148 |     await newBtn.click();
+  149 |     await page.waitForTimeout(2000);
+  150 |     const formVisible = await page.locator('form, [role="dialog"]').first().isVisible().catch(() => false);
+  151 |     expect(formVisible).toBe(true);
+  152 |   });
+  153 | 
+  154 |   test('TC-F01-01: Fill and save new candidate with all fields', async ({ page }) => {
+  155 |     const newBtn = page.locator('button:has-text("New candidate")').first();
+  156 |     await newBtn.waitFor({ state: 'visible', timeout: 15000 });
+  157 |     await newBtn.click();
+  158 |     await page.waitForTimeout(2000);
+  159 | 
+  160 |     await fillIfVisible(page, 'input[placeholder*="name" i], input[name*="name" i]', TEST_CANDIDATE.name);
+  161 |     await fillIfVisible(page, 'input[placeholder*="title" i], input[name*="title" i]', TEST_CANDIDATE.title);
+  162 |     await fillIfVisible(page, 'input[type="email"], input[placeholder*="email" i]', TEST_CANDIDATE.email);
+  163 |     await fillIfVisible(page, 'input[placeholder*="phone" i], input[type="tel"]', TEST_CANDIDATE.phone);
+  164 |     await fillIfVisible(page, 'input[placeholder*="year" i], input[name*="year" i]', TEST_CANDIDATE.years);
+```
