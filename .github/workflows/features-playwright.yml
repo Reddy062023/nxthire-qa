@@ -28,11 +28,14 @@ jobs:
       - name: Install Playwright (Chrome only)
         run: npx playwright install --with-deps chromium
 
+      - name: Confirm features.spec.js is present
+        run: ls -la features.spec.js && cat playwright.config.js
+
       - name: Run features.spec.js
         env:
           NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
           NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
-        run: npx playwright test features.spec.js --reporter=list,allure-playwright
+        run: npx playwright test features.spec.js
         continue-on-error: true   # let the report publish even if some tests fail
 
       - name: Generate Allure report
