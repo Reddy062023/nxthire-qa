@@ -46,10 +46,37 @@ const CREDS = {
 // URL pattern in case the landing page ever changes.
 async function login(page) {
   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
+  console.log(`[login] on login page: ${page.url()}`);
+  console.log(`[login] email configured: ${CREDS.email ? 'yes (' + CREDS.email.slice(0, 3) + '***)' : 'NO — NXTHIRE_EMAIL is empty!'}`);
+  console.log(`[login] password configured: ${CREDS.password ? 'yes' : 'NO — NXTHIRE_PASSWORD is empty!'}`);
+
   await page.fill('input[type="email"]', CREDS.email);
   await page.fill('input[type="password"]', CREDS.password);
   await page.click('button[type="submit"]');
+  await page.waitForTimeout(3000);
+  console.log(`[login] after submit, url: ${page.url()}`);
+
+  // Verify we actually landed in the app, not still on login/marketing page.
+  const stillOnLogin = await page.locator('text=/sign in to your agency workspace/i').isVisible().catch(() => false);
+  if (stillOnLogin) {
+    console.log('[login] STILL ON LOGIN PAGE after submit — credentials likely rejected or form fields mismatched.');
+    await page.screenshot({ path: `login-failure-${Date.now()}.png` }).catch(() => {});
+    throw new Error('Login failed: still on login/landing page after submitting credentials. Check NXTHIRE_EMAIL/NXTHIRE_PASSWORD secrets and login form selectors.');
+  }
+
   await page.locator('text=Candidates').first().waitFor({ state: 'visible', timeout: 60000 });
+  console.log(`[login] confirmed logged in, url: ${page.url()}`);
+}
+
+// Verifies the current page is actually authenticated app content, not a
+// bounce-back to the login/marketing page. Call this after any page.goto()
+// if session-persistence flakiness is suspected (see CHANGELOG note above).
+async function ensureLoggedIn(page) {
+  const onLoginPage = await page.locator('text=/sign in to your agency workspace/i').isVisible().catch(() => false);
+  if (onLoginPage) {
+    console.log(`[ensureLoggedIn] Bounced back to login page at ${page.url()} — re-authenticating.`);
+    await login(page);
+  }
 }
 
 // Opens the first candidate in the list via its "View" action and
@@ -57,6 +84,7 @@ async function login(page) {
 async function openFirstCandidate(page) {
   await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
   await page.waitForTimeout(2000);
+  await ensureLoggedIn(page);
   const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
   await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
   await viewBtn.click();
