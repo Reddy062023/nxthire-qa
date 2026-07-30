@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'features.spec.js'
+      - 'tests/features.spec.js'
       - '.github/workflows/features-playwright.yml'
 
 jobs:
@@ -28,14 +28,14 @@ jobs:
       - name: Install Playwright (Chrome only)
         run: npx playwright install --with-deps chromium
 
-      - name: Confirm features.spec.js is present
-        run: ls -la features.spec.js && cat playwright.config.js
+      - name: Confirm tests/features.spec.js is present
+        run: ls -la tests/features.spec.js && cat playwright.config.js
 
-      - name: Run features.spec.js
+      - name: Run tests/features.spec.js
         env:
           NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
           NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
-        run: npx playwright test features.spec.js
+        run: npx playwright test tests/features.spec.js
         continue-on-error: true   # let the report publish even if some tests fail
 
       - name: Generate Allure report
