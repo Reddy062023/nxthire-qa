@@ -1,0 +1,58 @@
+name: NxtHire Features Suite (Allure Report)
+
+on:
+  workflow_dispatch:        # manual "Run workflow" button in GitHub Actions tab
+  push:
+    branches: [main]
+    paths:
+      - 'features.spec.js'
+      - '.github/workflows/features-playwright.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (Chrome only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run features.spec.js
+        env:
+          NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
+          NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
+        run: npx playwright test features.spec.js --reporter=list,allure-playwright
+        continue-on-error: true   # let the report publish even if some tests fail
+
+      - name: Generate Allure report
+        run: |
+          npm install -g allure-commandline --save-dev
+          allure generate allure-results --clean -o allure-report-features
+
+      # Publishes to a features/ subfolder so it never overwrites the
+      # existing openjobs/datasources report living at the repo root of
+      # the docs/ folder (https://reddy062023.github.io/nxthire-qa/).
+      - name: Prepare docs/features folder for Pages
+        run: |
+          mkdir -p docs/features
+          rm -rf docs/features/*
+          cp -r allure-report-features/* docs/features/
+
+      - name: Commit and push updated report
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/features
+          git diff --staged --quiet || git commit -m "Update Features suite Allure report [skip ci]"
+          git push
