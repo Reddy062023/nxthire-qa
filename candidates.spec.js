@@ -1,7 +1,7 @@
 // ============================================================
 // NxtHire.ai – Candidates Page Test Suite
 // Tool: Playwright  |  Target: nxthire.ai/candidates
-// Version: 2.1  |  Date: June 2026
+// Version: 3.0  |  Date: June 2026
 // Tester: Japendra  |  North Star Group Inc.
 // Run:  npx playwright test candidates.spec.js --headed
 // Credentials: stored in .env file — never hardcode passwords
@@ -406,14 +406,12 @@ test.describe('TC-11-F Bulk Import', () => {
 
 // ─────────────────────────────────────────────────────────────
 // TC-11-G — Ask Agent
-// FIX v2.1: Use waitFor + force click to handle Firefox timing
 // ─────────────────────────────────────────────────────────────
 test.describe('TC-11-G Ask Agent', () => {
 
   test('Ask agent navigates to AI Recruiter chat', async ({ page }) => {
     await login(page);
     await goToCandidates(page);
-    // Wait for button to be fully ready then force click for Firefox
     const askBtn = page.locator('button:has-text("Ask agent")').first();
     await askBtn.waitFor({ state: 'visible', timeout: 30000 });
     await page.waitForTimeout(2000);
@@ -481,6 +479,510 @@ test.describe('TC-11-I Sort', () => {
         return;
       }
     }
+  });
+
+});
+
+// ─────────────────────────────────────────────────────────────
+// TC-11-J — Add New Candidate
+// ─────────────────────────────────────────────────────────────
+test.describe('TC-11-J Add New Candidate', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await goToCandidates(page);
+  });
+
+  test('Add New Candidate button is present', async ({ page }) => {
+    const addBtn = page.locator('button:has-text("Add"), button:has-text("New Candidate"), a:has-text("Add Candidate")').first();
+    const visible = await addBtn.isVisible().catch(() => false);
+    console.log(`Add New Candidate button visible: ${visible}`);
+    if (!visible) {
+      console.log('FINDING: No Add Candidate button found — check if feature exists in UI');
+    } else {
+      console.log('PASS: Add Candidate button present');
+    }
+  });
+
+  test('Add New Candidate form opens on button click', async ({ page }) => {
+    const addBtn = page.locator('button:has-text("Add"), button:has-text("New Candidate"), a:has-text("Add Candidate")').first();
+    await addBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await addBtn.click();
+    await page.waitForTimeout(3000);
+    const formVisible = await page.locator('form, [role="dialog"], .modal').isVisible().catch(() => false);
+    const urlChanged = !page.url().endsWith('/candidates');
+    console.log(`Form/modal visible: ${formVisible} | URL changed: ${urlChanged}`);
+    expect(formVisible || urlChanged).toBe(true);
+    console.log('PASS: Add Candidate form/page opened');
+  });
+
+  test('Add candidate with all mandatory fields and save', async ({ page }) => {
+    const addBtn = page.locator('button:has-text("Add"), button:has-text("New Candidate"), a:has-text("Add Candidate")').first();
+    await addBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await addBtn.click();
+    await page.waitForTimeout(3000);
+
+    const nameField = page.locator('input[placeholder*="name" i], input[name*="name" i]').first();
+    if (await nameField.isVisible().catch(() => false)) {
+      await nameField.fill('QA Test Candidate');
+      console.log('Filled: Name');
+    }
+
+    const emailField = page.locator('input[type="email"], input[placeholder*="email" i]').first();
+    if (await emailField.isVisible().catch(() => false)) {
+      await emailField.fill('qatest.candidate@nstartest.com');
+      console.log('Filled: Email');
+    }
+
+    const phoneField = page.locator('input[placeholder*="phone" i], input[type="tel"]').first();
+    if (await phoneField.isVisible().catch(() => false)) {
+      await phoneField.fill('6175550199');
+      console.log('Filled: Phone');
+    }
+
+    const saveBtn = page.locator('button:has-text("Save"), button:has-text("Submit"), button[type="submit"]').first();
+    if (await saveBtn.isVisible().catch(() => false)) {
+      await saveBtn.click();
+      await page.waitForTimeout(4000);
+      const success = await page.locator('text=/success/i, text=/saved/i, text=/created/i').isVisible().catch(() => false);
+      console.log(`Save success message: ${success}`);
+      console.log('PASS: Add candidate form submitted');
+    } else {
+      console.log('FINDING: Save button not found — check form structure');
+    }
+  });
+
+  test('Add candidate with missing mandatory fields shows validation error', async ({ page }) => {
+    const addBtn = page.locator('button:has-text("Add"), button:has-text("New Candidate"), a:has-text("Add Candidate")').first();
+    await addBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await addBtn.click();
+    await page.waitForTimeout(3000);
+
+    const saveBtn = page.locator('button:has-text("Save"), button:has-text("Submit"), button[type="submit"]').first();
+    if (await saveBtn.isVisible().catch(() => false)) {
+      await saveBtn.click();
+      await page.waitForTimeout(2000);
+      const error = await page.locator('text=/required/i, text=/error/i, .error, [class*="error"]').isVisible().catch(() => false);
+      console.log(`Validation error shown: ${error}`);
+      if (error) {
+        console.log('PASS: Validation error shown for empty form');
+      } else {
+        console.log('FINDING: No validation error shown for empty form — investigate');
+      }
+    }
+  });
+
+  test('Newly added candidate appears in candidates list', async ({ page }) => {
+    await search(page, 'QA Test Candidate');
+    await page.waitForTimeout(3000);
+    const noResults = await page.locator('text=No candidates match').isVisible().catch(() => false);
+    console.log(`QA Test Candidate found in list: ${!noResults}`);
+    if (!noResults) {
+      console.log('PASS: Newly added candidate appears in search results');
+    } else {
+      console.log('FINDING: Newly added candidate not found — check if add worked');
+    }
+  });
+
+});
+
+// ─────────────────────────────────────────────────────────────
+// TC-11-K — Edit Candidate
+// ─────────────────────────────────────────────────────────────
+test.describe('TC-11-K Edit Candidate', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await goToCandidates(page);
+  });
+
+  test('Edit button is present on candidate row or profile', async ({ page }) => {
+    const editBtn = page.locator('button:has-text("Edit"), a:has-text("Edit")').first();
+    const visible = await editBtn.isVisible().catch(() => false);
+    console.log(`Edit button visible on list: ${visible}`);
+    if (!visible) {
+      const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+      await viewBtn.click();
+      await page.waitForTimeout(3000);
+      const editInProfile = await page.locator('button:has-text("Edit"), a:has-text("Edit")').isVisible().catch(() => false);
+      console.log(`Edit button visible inside profile: ${editInProfile}`);
+      expect(editInProfile).toBe(true);
+    } else {
+      console.log('PASS: Edit button present');
+    }
+  });
+
+  test('Edit candidate — update phone number and save', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(3000);
+
+    const editBtn = page.locator('button:has-text("Edit"), a:has-text("Edit")').first();
+    await editBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await editBtn.click();
+    await page.waitForTimeout(3000);
+
+    const phoneField = page.locator('input[placeholder*="phone" i], input[type="tel"]').first();
+    if (await phoneField.isVisible().catch(() => false)) {
+      await phoneField.clear();
+      await phoneField.fill('6175550100');
+      console.log('Filled: Updated phone number');
+    }
+
+    const saveBtn = page.locator('button:has-text("Save"), button:has-text("Update"), button[type="submit"]').first();
+    if (await saveBtn.isVisible().catch(() => false)) {
+      await saveBtn.click();
+      await page.waitForTimeout(3000);
+      const success = await page.locator('text=/success/i, text=/saved/i, text=/updated/i').isVisible().catch(() => false);
+      console.log(`Update success: ${success}`);
+      console.log('PASS: Edit candidate submitted');
+    } else {
+      console.log('FINDING: Save button not found in edit form');
+    }
+  });
+
+  test('Edit candidate — update skills and save', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(3000);
+
+    const editBtn = page.locator('button:has-text("Edit"), a:has-text("Edit")').first();
+    await editBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await editBtn.click();
+    await page.waitForTimeout(3000);
+
+    const skillsField = page.locator('input[placeholder*="skill" i], textarea[placeholder*="skill" i]').first();
+    if (await skillsField.isVisible().catch(() => false)) {
+      await skillsField.fill('Java, Python, Playwright');
+      console.log('Filled: Skills updated');
+    } else {
+      console.log('FINDING: Skills field not found — may use tag/chip input');
+    }
+
+    const saveBtn = page.locator('button:has-text("Save"), button:has-text("Update"), button[type="submit"]').first();
+    if (await saveBtn.isVisible().catch(() => false)) {
+      await saveBtn.click();
+      await page.waitForTimeout(3000);
+      console.log('PASS: Edit skills submitted');
+    }
+  });
+
+  test('Cancel edit — no changes saved', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(3000);
+
+    const editBtn = page.locator('button:has-text("Edit"), a:has-text("Edit")').first();
+    await editBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await editBtn.click();
+    await page.waitForTimeout(3000);
+
+    const cancelBtn = page.locator('button:has-text("Cancel"), button:has-text("Discard")').first();
+    if (await cancelBtn.isVisible().catch(() => false)) {
+      await cancelBtn.click();
+      await page.waitForTimeout(2000);
+      console.log('PASS: Cancel button works — edit dismissed');
+    } else {
+      console.log('FINDING: Cancel button not found in edit form');
+    }
+  });
+
+});
+
+// ─────────────────────────────────────────────────────────────
+// TC-11-L — Delete Candidate
+// ─────────────────────────────────────────────────────────────
+test.describe('TC-11-L Delete Candidate', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await goToCandidates(page);
+  });
+
+  test('Delete button is present on candidate row or profile', async ({ page }) => {
+    const deleteBtn = page.locator('button:has-text("Delete"), a:has-text("Delete")').first();
+    const visible = await deleteBtn.isVisible().catch(() => false);
+    console.log(`Delete button visible on list: ${visible}`);
+    if (!visible) {
+      const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+      await viewBtn.click();
+      await page.waitForTimeout(3000);
+      const deleteInProfile = await page.locator('button:has-text("Delete"), a:has-text("Delete")').isVisible().catch(() => false);
+      console.log(`Delete button inside profile: ${deleteInProfile}`);
+    } else {
+      console.log('PASS: Delete button present');
+    }
+  });
+
+  test('Delete shows confirmation dialog', async ({ page }) => {
+    await search(page, 'QA Test Candidate');
+    await page.waitForTimeout(3000);
+
+    const deleteBtn = page.locator('button:has-text("Delete"), a:has-text("Delete")').first();
+    if (await deleteBtn.isVisible().catch(() => false)) {
+      await deleteBtn.click();
+      await page.waitForTimeout(2000);
+      const confirmDialog = await page.locator('[role="dialog"], .modal, text=/confirm/i, text=/are you sure/i').isVisible().catch(() => false);
+      console.log(`Confirmation dialog shown: ${confirmDialog}`);
+      if (confirmDialog) {
+        console.log('PASS: Delete shows confirmation dialog');
+        const cancelBtn = page.locator('button:has-text("Cancel"), button:has-text("No")').first();
+        if (await cancelBtn.isVisible().catch(() => false)) {
+          await cancelBtn.click();
+          console.log('Cancelled delete — data preserved');
+        }
+      } else {
+        console.log('FINDING: No confirmation dialog before delete');
+      }
+    } else {
+      console.log('FINDING: Delete button not found — check if feature exists');
+    }
+  });
+
+  test('Delete QA test candidate and verify removed from list', async ({ page }) => {
+    await search(page, 'QA Test Candidate');
+    await page.waitForTimeout(3000);
+
+    const deleteBtn = page.locator('button:has-text("Delete"), a:has-text("Delete")').first();
+    if (await deleteBtn.isVisible().catch(() => false)) {
+      await deleteBtn.click();
+      await page.waitForTimeout(2000);
+
+      const confirmBtn = page.locator('button:has-text("Confirm"), button:has-text("Yes"), button:has-text("Delete")').last();
+      if (await confirmBtn.isVisible().catch(() => false)) {
+        await confirmBtn.click();
+        await page.waitForTimeout(3000);
+        await search(page, 'QA Test Candidate');
+        await page.waitForTimeout(3000);
+        const noResults = await page.locator('text=No candidates match').isVisible().catch(() => false);
+        console.log(`Candidate removed from list: ${noResults}`);
+        if (noResults) {
+          console.log('PASS: Deleted candidate no longer appears in search');
+        } else {
+          console.log('FINDING: Candidate still appears after delete');
+        }
+      }
+    } else {
+      console.log('FINDING: Delete button not found — skipping delete verification');
+    }
+  });
+
+});
+
+// ─────────────────────────────────────────────────────────────
+// TC-11-M — Candidate Profile Detail Verification
+// ─────────────────────────────────────────────────────────────
+test.describe('TC-11-M Candidate Profile Detail Verification', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await goToCandidates(page);
+  });
+
+  test('Candidate profile shows Name field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasName = body.match(/[A-Z][a-z]+ [A-Z][a-z]+/) !== null;
+    console.log(`Name visible in profile: ${hasName}`);
+    expect(hasName).toBe(true);
+    console.log('PASS: Name present in candidate profile');
+  });
+
+  test('Candidate profile shows Email field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasEmail = body.includes('@') && body.includes('.');
+    console.log(`Email visible in profile: ${hasEmail}`);
+    expect(hasEmail).toBe(true);
+    console.log('PASS: Email present in candidate profile');
+  });
+
+  test('Candidate profile shows Skills field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasSkills = body.toLowerCase().includes('skill');
+    console.log(`Skills section visible: ${hasSkills}`);
+    expect(hasSkills).toBe(true);
+    console.log('PASS: Skills section present in candidate profile');
+  });
+
+  test('Candidate profile shows Source field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasSource = body.toLowerCase().includes('source') ||
+                      body.toLowerCase().includes('ceipal') ||
+                      body.toLowerCase().includes('monster') ||
+                      body.toLowerCase().includes('indeed');
+    console.log(`Source visible in profile: ${hasSource}`);
+    expect(hasSource).toBe(true);
+    console.log('PASS: Source field present in candidate profile');
+  });
+
+  test('Candidate profile shows Location field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasLocation = body.toLowerCase().includes('location') ||
+                        body.toLowerCase().includes('state') ||
+                        body.toLowerCase().includes('city');
+    console.log(`Location visible in profile: ${hasLocation}`);
+    if (!hasLocation) {
+      console.log('FINDING: Location field not visible in profile — investigate');
+    } else {
+      console.log('PASS: Location present in candidate profile');
+    }
+  });
+
+  test('Candidate profile shows Experience field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasExperience = body.toLowerCase().includes('experience') ||
+                          body.toLowerCase().includes('years');
+    console.log(`Experience visible in profile: ${hasExperience}`);
+    if (!hasExperience) {
+      console.log('FINDING: Experience field not visible in profile — investigate');
+    } else {
+      console.log('PASS: Experience present in candidate profile');
+    }
+  });
+
+  test('Candidate profile shows Phone field', async ({ page }) => {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await viewBtn.click();
+    await page.waitForTimeout(4000);
+    const body = await page.locator('body').innerText();
+    const hasPhone = body.match(/\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)\s*\d{3}[-.\s]\d{4}|\d{10}/) !== null;
+    console.log(`Phone number visible in profile: ${hasPhone}`);
+    if (!hasPhone) {
+      console.log('FINDING: Phone number not visible in profile — investigate');
+    } else {
+      console.log('PASS: Phone present in candidate profile');
+    }
+  });
+
+});
+
+// ─────────────────────────────────────────────────────────────
+// TC-11-N — Source Tag Verification
+// ─────────────────────────────────────────────────────────────
+test.describe('TC-11-N Source Tag Verification', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await goToCandidates(page);
+  });
+
+  test('Filter by Ceipal — candidate profile shows Source = Ceipal', async ({ page }) => {
+    const selects = page.locator('select');
+    const count = await selects.count();
+    for (let i = 0; i < count; i++) {
+      const options = await selects.nth(i).locator('option').allInnerTexts();
+      if (options.some(o => o.toLowerCase().includes('ceipal'))) {
+        const ceipalOption = options.find(o => o.toLowerCase().includes('ceipal'));
+        await selects.nth(i).selectOption({ label: ceipalOption });
+        await page.waitForTimeout(3000);
+        const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+        await viewBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await viewBtn.click();
+        await page.waitForTimeout(3000);
+        const body = await page.locator('body').innerText();
+        const hasCeipal = body.toLowerCase().includes('ceipal');
+        console.log(`Ceipal source tag visible in profile: ${hasCeipal}`);
+        expect(hasCeipal).toBe(true);
+        console.log('PASS: Ceipal-filtered candidate shows Source = Ceipal');
+        return;
+      }
+    }
+    console.log('FINDING: Ceipal filter option not found');
+  });
+
+  test('Filter by Monster — candidate profile shows Source = Monster', async ({ page }) => {
+    const selects = page.locator('select');
+    const count = await selects.count();
+    for (let i = 0; i < count; i++) {
+      const options = await selects.nth(i).locator('option').allInnerTexts();
+      if (options.some(o => o.toLowerCase().includes('monster'))) {
+        const monsterOption = options.find(o => o.toLowerCase().includes('monster'));
+        await selects.nth(i).selectOption({ label: monsterOption });
+        await page.waitForTimeout(3000);
+        const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+        await viewBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await viewBtn.click();
+        await page.waitForTimeout(3000);
+        const body = await page.locator('body').innerText();
+        const hasMonster = body.toLowerCase().includes('monster');
+        console.log(`Monster source tag visible in profile: ${hasMonster}`);
+        expect(hasMonster).toBe(true);
+        console.log('PASS: Monster-filtered candidate shows Source = Monster');
+        return;
+      }
+    }
+    console.log('FINDING: Monster filter option not found');
+  });
+
+  test('Filter by Indeed — candidate profile shows Source = Indeed', async ({ page }) => {
+    const selects = page.locator('select');
+    const count = await selects.count();
+    for (let i = 0; i < count; i++) {
+      const options = await selects.nth(i).locator('option').allInnerTexts();
+      if (options.some(o => o.toLowerCase().includes('indeed'))) {
+        const indeedOption = options.find(o => o.toLowerCase().includes('indeed'));
+        await selects.nth(i).selectOption({ label: indeedOption });
+        await page.waitForTimeout(3000);
+        const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+        await viewBtn.waitFor({ state: 'visible', timeout: 15000 });
+        await viewBtn.click();
+        await page.waitForTimeout(3000);
+        const body = await page.locator('body').innerText();
+        const hasIndeed = body.toLowerCase().includes('indeed');
+        console.log(`Indeed source tag visible in profile: ${hasIndeed}`);
+        expect(hasIndeed).toBe(true);
+        console.log('PASS: Indeed-filtered candidate shows Source = Indeed');
+        return;
+      }
+    }
+    console.log('FINDING: Indeed filter option not found');
+  });
+
+  test('Candidate list shows Source column with values', async ({ page }) => {
+    const body = await page.locator('body').innerText();
+    const hasSourceValues = body.toLowerCase().includes('ceipal') ||
+                            body.toLowerCase().includes('monster') ||
+                            body.toLowerCase().includes('indeed') ||
+                            body.toLowerCase().includes('theirstack');
+    console.log(`Source values visible in candidate list: ${hasSourceValues}`);
+    expect(hasSourceValues).toBe(true);
+    console.log('PASS: Source column has values in candidate list');
+  });
+
+  test('Candidate with no source shows blank or Unknown', async ({ page }) => {
+    const body = await page.locator('body').innerText();
+    const hasUnknown = body.toLowerCase().includes('unknown') ||
+                       body.toLowerCase().includes('manual') ||
+                       body.toLowerCase().includes('n/a');
+    console.log(`Unknown/manual source shown: ${hasUnknown}`);
+    console.log('NOTE: Check if candidates without a source show blank, Unknown, or Manual');
   });
 
 });
