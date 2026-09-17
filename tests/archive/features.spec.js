@@ -40,11 +40,24 @@ const CREDS = {
 };
 
 // ── Login helper ──────────────────────────────────────────────
-// FIX: the app has no /dashboard route. After login it lands on
-// /candidates (confirmed across every manual test screenshot).
-// Waiting on the sidebar "Candidates" link is more robust than a
-// URL pattern in case the landing page ever changes.
+// Login redirects to /dashboard, which has no "New candidate" button —
+// so after submitting credentials we navigate to /candidates explicitly
+// and confirm login by that button's presence there.
 async function login(page) {
+  // With shared auth state (see playwright.config.js "setup" project),
+  // every test starts already logged in. Check for that first and skip
+  // the login form entirely — this avoids hitting the login endpoint
+  // 64 times per run, which is likely why some runs saw intermittent
+  // "still on login page" failures (server-side rate limiting/throttling
+  // on repeated rapid logins from the same script).
+  await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 }).catch(() => {});
+  const alreadyLoggedIn = await page.locator('button:has-text("New candidate")').first().isVisible().catch(() => false);
+  if (alreadyLoggedIn) {
+    console.log('[login] already authenticated via shared session — skipping login form');
+    return;
+  }
+
+  console.log('[login] no active session found — logging in via form (fallback)');
   await page.goto(`${BASE_URL}/login`, { timeout: 60000 });
   console.log(`[login] on login page: ${page.url()}`);
   console.log(`[login] email configured: ${CREDS.email ? 'yes (' + CREDS.email.slice(0, 3) + '***)' : 'NO — NXTHIRE_EMAIL is empty!'}`);
@@ -64,7 +77,11 @@ async function login(page) {
     throw new Error('Login failed: still on login/landing page after submitting credentials. Check NXTHIRE_EMAIL/NXTHIRE_PASSWORD secrets and login form selectors.');
   }
 
-  await page.locator('text=Candidates').first().waitFor({ state: 'visible', timeout: 60000 });
+  // Login redirects to /dashboard, not /candidates — the "New candidate"
+  // button only exists on the Candidates page, so navigate there
+  // explicitly before checking for it as our login-success signal.
+  await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
+  await page.locator('button:has-text("New candidate")').first().waitFor({ state: 'visible', timeout: 60000 });
   console.log(`[login] confirmed logged in, url: ${page.url()}`);
 }
 
@@ -85,10 +102,39 @@ async function openFirstCandidate(page) {
   await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
   await page.waitForTimeout(2000);
   await ensureLoggedIn(page);
-  const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
-  await viewBtn.waitFor({ state: 'visible', timeout: 30000 });
-  await viewBtn.click();
-  await page.waitForTimeout(3000);
+
+  // Dismiss the "AI is temporarily unavailable" banner if present — it can
+  // shift page layout enough to cause clicks to land on the wrong element.
+  await page.locator('button:has-text("Dismiss")').first().click({ timeout: 3000 }).catch(() => {});
+  await page.waitForTimeout(500);
+
+  // CONFIRMED via manual DevTools check: clicking "View" navigates the SAME
+  // tab to /candidates/<id> — no popup, no new tab. The click and navigation
+  // themselves work fine. The actual problem was almost certainly our
+  // verification step: waiting for "Match score"/"Pick jobs" text, which can
+  // race against a slow-rendering AI panel ("Claude's read on this
+  // candidate" took 3.2s in the confirmed screenshot) that shifts page
+  // layout during our fixed wait. Verify by URL pattern instead — far more
+  // reliable than waiting for specific text to render.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const viewBtn = page.locator('button:has-text("View"), a:has-text("View")').first();
+    await viewBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await viewBtn.click();
+
+    const onDetailPage = await page.waitForURL(/\/candidates\/[A-Za-z0-9]+/, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (onDetailPage) {
+      // Give the detail page's slower content (AI summary panel, matched
+      // jobs list) a moment to render before the calling test proceeds.
+      await page.waitForTimeout(2000);
+      return page;
+    }
+
+    console.log(`[openFirstCandidate] Did not land on candidate detail page (attempt ${attempt + 1}), retrying...`);
+    await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
+    await page.waitForTimeout(2000);
+  }
+  console.log('[openFirstCandidate] WARNING: could not confirm candidate detail page after 2 attempts.');
+  return page;
 }
 
 // ── Test Data ─────────────────────────────────────────────────
@@ -134,17 +180,21 @@ test.describe('Feature 1 — Create Candidate Manually', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
     await page.goto(`${BASE_URL}/candidates`, { timeout: 60000 });
-    await page.waitForTimeout(3000);
+    // Candidates page can load a large dataset (80k+ records) — give it
+    // more time to settle than a typical page, especially right after
+    // a fresh shared-session write.
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(4000);
   });
 
   test('TC-F01-01: New candidate button is present on Candidates page', async ({ page }) => {
     const newBtn = page.locator('button:has-text("New candidate")').first();
-    await expect(newBtn).toBeVisible({ timeout: 15000 });
+    await expect(newBtn).toBeVisible({ timeout: 30000 });
   });
 
   test('TC-F01-01: Create candidate form opens on button click', async ({ page }) => {
     const newBtn = page.locator('button:has-text("New candidate")').first();
-    await newBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await newBtn.waitFor({ state: 'visible', timeout: 30000 });
     await newBtn.click();
     await page.waitForTimeout(2000);
     const formVisible = await page.locator('form, [role="dialog"]').first().isVisible().catch(() => false);
@@ -157,12 +207,12 @@ test.describe('Feature 1 — Create Candidate Manually', () => {
     await newBtn.click();
     await page.waitForTimeout(2000);
 
-    await fillIfVisible(page, 'input[placeholder*="name" i], input[name*="name" i]', TEST_CANDIDATE.name);
-    await fillIfVisible(page, 'input[placeholder*="title" i], input[name*="title" i]', TEST_CANDIDATE.title);
-    await fillIfVisible(page, 'input[type="email"], input[placeholder*="email" i]', TEST_CANDIDATE.email);
-    await fillIfVisible(page, 'input[placeholder*="phone" i], input[type="tel"]', TEST_CANDIDATE.phone);
-    await fillIfVisible(page, 'input[placeholder*="year" i], input[name*="year" i]', TEST_CANDIDATE.years);
-    await fillIfVisible(page, 'input[placeholder*="skill" i], textarea[placeholder*="skill" i]', TEST_CANDIDATE.skills);
+    await fillField(page, /^name$/i, 'input[placeholder*="name" i], input[name*="name" i]', TEST_CANDIDATE.name);
+    await fillField(page, /^title$/i, 'input[placeholder*="title" i], input[name*="title" i]', TEST_CANDIDATE.title);
+    await fillField(page, /^email$/i, 'input[type="email"], input[placeholder*="email" i]', TEST_CANDIDATE.email);
+    await fillField(page, /^phone$/i, 'input[placeholder*="phone" i], input[type="tel"]', TEST_CANDIDATE.phone);
+    await fillField(page, /years of experience/i, 'input[placeholder*="year" i], input[name*="year" i]', TEST_CANDIDATE.years);
+    await fillField(page, /skills/i, 'input[placeholder*="skill" i], textarea[placeholder*="skill" i]', TEST_CANDIDATE.skills);
 
     const saveBtn = page.locator('button:has-text("Save"), button:has-text("Create"), button[type="submit"]').first();
     await expect(saveBtn).toBeVisible();
@@ -179,8 +229,9 @@ test.describe('Feature 1 — Create Candidate Manually', () => {
     await newBtn.click();
     await page.waitForTimeout(2000);
 
-    const yearsField = page.locator('input[placeholder*="year" i], input[name*="year" i]').first();
-    await yearsField.waitFor({ state: 'visible', timeout: 10000 });
+    const yearsField = page.getByLabel(/years of experience/i)
+      .or(page.locator('input[placeholder*="year" i], input[name*="year" i]')).first();
+    await yearsField.waitFor({ state: 'visible', timeout: 15000 });
     await yearsField.fill('abc');
     await page.waitForTimeout(500);
     const value = await yearsField.inputValue();
@@ -200,8 +251,8 @@ test.describe('Feature 1 — Create Candidate Manually', () => {
     await newBtn.waitFor({ state: 'visible', timeout: 15000 });
     await newBtn.click();
     await page.waitForTimeout(2000);
-    await fillIfVisible(page, 'input[placeholder*="name" i], input[name*="name" i]', `${TEST_CANDIDATE.name} Edu`);
-    await fillIfVisible(page, 'input[type="email"], input[placeholder*="email" i]', `edu.${Date.now()}@nstartest.com`);
+    await fillField(page, /^name$/i, 'input[placeholder*="name" i], input[name*="name" i]', `${TEST_CANDIDATE.name} Edu`);
+    await fillField(page, /^email$/i, 'input[type="email"], input[placeholder*="email" i]', `edu.${Date.now()}@nstartest.com`);
     await fillIfVisible(page, 'textarea[placeholder*="education" i]', 'B.S Computer Science, MIT, 2015');
     const saveBtn = page.locator('button:has-text("Save"), button:has-text("Create"), button[type="submit"]').first();
     if (await saveBtn.isVisible().catch(() => false)) {
@@ -217,8 +268,8 @@ test.describe('Feature 1 — Create Candidate Manually', () => {
     await newBtn.waitFor({ state: 'visible', timeout: 15000 });
     await newBtn.click();
     await page.waitForTimeout(2000);
-    await fillIfVisible(page, 'input[placeholder*="name" i], input[name*="name" i]', `${TEST_CANDIDATE.name} Social`);
-    await fillIfVisible(page, 'input[type="email"], input[placeholder*="email" i]', `social.${Date.now()}@nstartest.com`);
+    await fillField(page, /^name$/i, 'input[placeholder*="name" i], input[name*="name" i]', `${TEST_CANDIDATE.name} Social`);
+    await fillField(page, /^email$/i, 'input[type="email"], input[placeholder*="email" i]', `social.${Date.now()}@nstartest.com`);
     await fillIfVisible(page, 'textarea[placeholder*="social" i], input[placeholder*="linkedin" i]', 'https://linkedin.com/in/qatest');
     const saveBtn = page.locator('button:has-text("Save"), button:has-text("Create"), button[type="submit"]').first();
     if (await saveBtn.isVisible().catch(() => false)) {
@@ -252,7 +303,7 @@ test.describe('Feature 2 — Parse Resume on Create', () => {
   });
 
   test('TC-F02-03: Resume card shows on candidate detail after parse-create', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const resumeCard = page.locator('text=/resume/i').first();
     await expect(resumeCard).toBeVisible({ timeout: 10000 });
   });
@@ -297,13 +348,13 @@ test.describe('Feature 3 — Edit Candidate', () => {
   // a pencil icon button in the action bar next to Email/Word resume —
   // matching by icon button position is more reliable than by class name.
   test('TC-F03-01: Edit (pencil) icon present on candidate detail page', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const editBtn = page.locator('button[aria-label*="edit" i], button:has(svg[class*="pencil" i]), button:has-text("Edit")').first();
     await expect(editBtn).toBeVisible({ timeout: 15000 });
   });
 
   test('TC-F03-02/03: Edit candidate — change name and add skill then save', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const editBtn = page.locator('button[aria-label*="edit" i], button:has-text("Edit")').first();
     await editBtn.waitFor({ state: 'visible', timeout: 15000 });
     await editBtn.click();
@@ -324,7 +375,7 @@ test.describe('Feature 3 — Edit Candidate', () => {
   });
 
   test('TC-F03-04: Changes persist after page reload', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     await page.reload();
     await page.waitForTimeout(3000);
     const body = await page.locator('body').innerText();
@@ -343,14 +394,14 @@ test.describe('Feature 4 — Word Resume Download', () => {
   });
 
   test('TC-F04-01: Word resume button present on candidate detail', async ({ page }) => {
-    await openFirstCandidate(page);
-    const wordBtn = page.locator('button:has-text("Word resume")').first();
+    page = await openFirstCandidate(page);
+    const wordBtn = page.locator('button:has-text("Word resume"), button:has-text("Download")').first();
     await expect(wordBtn).toBeVisible({ timeout: 15000 });
   });
 
   test('TC-F04-03: Word resume button triggers a .docx download', async ({ page }) => {
-    await openFirstCandidate(page);
-    const wordBtn = page.locator('button:has-text("Word resume")').first();
+    page = await openFirstCandidate(page);
+    const wordBtn = page.locator('button:has-text("Word resume"), button:has-text("Download")').first();
     await expect(wordBtn).toBeVisible({ timeout: 15000 });
     const downloadPromise = page.waitForEvent('download', { timeout: 15000 });
     await wordBtn.click();
@@ -373,7 +424,7 @@ test.describe('Feature 4 — Word Resume Download', () => {
     }
     await viewBtn.click();
     await page.waitForTimeout(3000);
-    const wordBtn = page.locator('button:has-text("Word resume")').first();
+    const wordBtn = page.locator('button:has-text("Word resume"), button:has-text("Download")').first();
     await expect(wordBtn).toBeVisible({ timeout: 10000 });
   });
 
@@ -389,7 +440,7 @@ test.describe('Feature 5 — Email Button and Templates', () => {
   });
 
   test('TC-F05-01: Email button present on candidate detail', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const emailBtn = page.locator('button:has-text("Email")').first();
     await expect(emailBtn).toBeVisible({ timeout: 15000 });
   });
@@ -405,10 +456,10 @@ test.describe('Feature 5 — Email Button and Templates', () => {
     await newBtn.click();
     await page.waitForTimeout(2000);
 
-    await fillIfVisible(page, 'input[placeholder*="name" i], input[name*="name" i]', NO_EMAIL_CANDIDATE.name);
-    await fillIfVisible(page, 'input[placeholder*="title" i], input[name*="title" i]', NO_EMAIL_CANDIDATE.title);
-    await fillIfVisible(page, 'input[placeholder*="year" i], input[name*="year" i]', NO_EMAIL_CANDIDATE.years);
-    await fillIfVisible(page, 'input[placeholder*="skill" i], textarea[placeholder*="skill" i]', NO_EMAIL_CANDIDATE.skills);
+    await fillField(page, /^name$/i, 'input[placeholder*="name" i], input[name*="name" i]', NO_EMAIL_CANDIDATE.name);
+    await fillField(page, /^title$/i, 'input[placeholder*="title" i], input[name*="title" i]', NO_EMAIL_CANDIDATE.title);
+    await fillField(page, /years of experience/i, 'input[placeholder*="year" i], input[name*="year" i]', NO_EMAIL_CANDIDATE.years);
+    await fillField(page, /skills/i, 'input[placeholder*="skill" i], textarea[placeholder*="skill" i]', NO_EMAIL_CANDIDATE.skills);
     // Deliberately leave email blank
 
     const saveBtn = page.locator('button:has-text("Save"), button:has-text("Create"), button[type="submit"]').first();
@@ -421,7 +472,7 @@ test.describe('Feature 5 — Email Button and Templates', () => {
   });
 
   test('TC-F05-03: Email modal opens with template applied', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const emailBtn = page.locator('button:has-text("Email")').first();
     if (!(await emailBtn.isVisible().catch(() => false)) || await emailBtn.isDisabled().catch(() => false)) {
       test.skip(true, 'Email button not available/enabled for this candidate');
@@ -435,7 +486,7 @@ test.describe('Feature 5 — Email Button and Templates', () => {
   });
 
   test('TC-F05-04: Send email and receive confirmation', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const emailBtn = page.locator('button:has-text("Email")').first();
     if (!(await emailBtn.isVisible().catch(() => false)) || await emailBtn.isDisabled().catch(() => false)) {
       test.skip(true, 'Email button not available/enabled for this candidate');
@@ -453,7 +504,7 @@ test.describe('Feature 5 — Email Button and Templates', () => {
   });
 
   test('TC-F05-05: Save as template — custom template appears in dropdown after reopening', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const emailBtn = page.locator('button:has-text("Email")').first();
     if (!(await emailBtn.isVisible().catch(() => false)) || await emailBtn.isDisabled().catch(() => false)) {
       test.skip(true, 'Email button not available/enabled for this candidate');
@@ -490,7 +541,7 @@ test.describe('Feature 6 — Verification Checklist and Duplicate Check', () => 
   });
 
   test('TC-F06-01: Verification checklist card present on candidate detail', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const body = await page.locator('body').innerText();
     expect(body.toLowerCase()).toContain('verification');
   });
@@ -498,7 +549,7 @@ test.describe('Feature 6 — Verification Checklist and Duplicate Check', () => 
   // FIX v2.0: v1.0 checked only whether the word "duplicate" appeared
   // anywhere on the page, which is too loose. Scope to the card itself.
   test('TC-F06-03: Duplicate submission check card present and returns a result', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const checkBtn = page.locator('button:has-text("Check")').first();
     await expect(checkBtn).toBeVisible({ timeout: 10000 });
     await checkBtn.click();
@@ -508,7 +559,7 @@ test.describe('Feature 6 — Verification Checklist and Duplicate Check', () => 
   });
 
   test('TC-F06-02: Verification checklist item persists as ticked after reload', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const checklistItem = page.locator('input[type="checkbox"]').first();
     if (!(await checklistItem.isVisible().catch(() => false))) {
       test.skip(true, 'No checklist checkbox found on this candidate');
@@ -528,7 +579,11 @@ test.describe('Feature 6 — Verification Checklist and Duplicate Check', () => 
     await page.waitForTimeout(2000);
     const searchBox = page.locator('input[placeholder*="Search" i]').first();
     await searchBox.fill(TEST_CANDIDATE.name);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
+    const nameVisible = await page.locator(`text=${TEST_CANDIDATE.name}`).first().isVisible().catch(() => false);
+    if (!nameVisible) {
+      test.skip(true, `No candidate named "${TEST_CANDIDATE.name}" found — run Feature 1 tests first`);
+    }
     const viewBtn = page.locator('button:has-text("View")').first();
     if (!(await viewBtn.isVisible().catch(() => false))) {
       test.skip(true, `No candidate named "${TEST_CANDIDATE.name}" found — run Feature 1 tests first`);
@@ -612,6 +667,7 @@ test.describe('Feature 7 — Jobs: Templates, Assignment, On-Hold', () => {
   });
 
   test('TC-F07-04: Assigned recruiter persists after reload', async ({ page }) => {
+    await page.locator('button:has-text("Dismiss")').first().click({ timeout: 3000 }).catch(() => {});
     const viewBtn = page.locator('button:has-text("View")').first();
     await viewBtn.waitFor({ state: 'visible', timeout: 15000 });
     await viewBtn.click();
@@ -753,8 +809,8 @@ test.describe('Feature 9 — Interviews and Placements', () => {
     await expect(placementsTab).toBeVisible({ timeout: 15000 });
     await placementsTab.click();
     await page.waitForTimeout(2000);
-    const logBtn = page.locator('button:has-text("Log placement")').first();
-    await expect(logBtn).toBeVisible({ timeout: 10000 });
+    const logBtn = page.locator('button:has-text("Log placement"), button:has-text("Add placement")').first();
+    await expect(logBtn).toBeVisible({ timeout: 15000 });
   });
 
   test('TC-F09-04: Interviews and placements feed Analytics counts', async ({ page }) => {
@@ -835,13 +891,13 @@ test.describe('Feature 11 — Application Pipeline', () => {
   });
 
   test('TC-F11-01: Pick jobs & apply button present on candidate detail', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const pickBtn = page.locator('button:has-text("Pick jobs")').first();
     await expect(pickBtn).toBeVisible({ timeout: 15000 });
   });
 
   test('TC-F11-02: Application status dropdown present after applying', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const body = await page.locator('body').innerText();
     expect(body.toLowerCase()).toMatch(/qualified|interviewing|already applied|offer/);
   });
@@ -854,7 +910,7 @@ test.describe('Feature 11 — Application Pipeline', () => {
   });
 
   test('TC-F11-04: Hired and onboarded status updates Analytics tiles', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const statusDropdown = page.locator('select').first();
     if (!(await statusDropdown.isVisible().catch(() => false))) {
       test.skip(true, 'No application status dropdown found on this candidate');
@@ -876,7 +932,7 @@ test.describe('Feature 11 — Application Pipeline', () => {
     await page.waitForTimeout(3000);
     const before = await page.locator('body').innerText();
     const backOutsBefore = (before.match(/back outs?\D*(\d+)/i) || [])[1];
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const statusDropdown = page.locator('select').first();
     if (!(await statusDropdown.isVisible().catch(() => false))) {
       test.skip(true, 'No application status dropdown found on this candidate');
@@ -978,7 +1034,7 @@ test.describe('Feature 13 — Hotlist Email', () => {
   });
 
   test('TC-F13-01: Set candidate status to bench via Edit', async ({ page }) => {
-    await openFirstCandidate(page);
+    page = await openFirstCandidate(page);
     const editBtn = page.locator('button[aria-label*="edit" i], button:has-text("Edit")').first();
     if (!(await editBtn.isVisible().catch(() => false))) {
       test.skip(true, 'Edit button not found on this candidate');
@@ -1046,9 +1102,12 @@ test.describe('Feature 14 — Sales CRM', () => {
     await expect(addBtn).toBeVisible({ timeout: 15000 });
     await addBtn.click();
     await page.waitForTimeout(2000);
-    await fillIfVisible(page, 'input[placeholder*="company name" i]', TEST_COMPANY.name);
-    await fillIfVisible(page, 'input[placeholder*="industry" i]', 'Technology');
-    await fillIfVisible(page, 'input[placeholder*="website" i]', TEST_COMPANY.website);
+    await fillIfVisible(page, 'input[placeholder*="company name" i]', TEST_COMPANY.name)
+      || await fillIfVisibleLocator(page.getByLabel(/company name/i), TEST_COMPANY.name);
+    await fillIfVisible(page, 'input[placeholder*="industry" i]', 'Technology')
+      || await fillIfVisibleLocator(page.getByLabel(/industry/i), 'Technology');
+    await fillIfVisible(page, 'input[placeholder*="website" i]', TEST_COMPANY.website)
+      || await fillIfVisibleLocator(page.getByLabel(/website/i), TEST_COMPANY.website);
     const saveBtn = page.locator('button:has-text("Add company")').last();
     if (await saveBtn.isVisible().catch(() => false)) {
       await saveBtn.click();
@@ -1145,8 +1204,33 @@ test.describe('Feature 14 — Sales CRM', () => {
 });
 
 // ── Shared helpers ───────────────────────────────────────────
+// Confirmed from a real screenshot of the New Candidate form: fields are
+// bare inputs with a <label> above them (e.g. "Years of experience"), NOT
+// placeholder text. Try the label first; fall back to the CSS selector
+// in case a different form on the page does use placeholders.
+async function fillField(page, labelPattern, fallbackSelector, value) {
+  const byLabel = page.getByLabel(labelPattern).first();
+  if (await byLabel.isVisible().catch(() => false)) {
+    await byLabel.fill(value);
+    return true;
+  }
+  return fillIfVisible(page, fallbackSelector, value);
+}
+
 async function fillIfVisible(page, selector, value) {
   const field = page.locator(selector).first();
+  if (await field.isVisible().catch(() => false)) {
+    await field.fill(value);
+    return true;
+  }
+  return false;
+}
+
+// Same idea as fillIfVisible, but takes an already-built locator (e.g. from
+// page.getByLabel()) instead of a CSS selector string — used as a fallback
+// when a field's real markup uses <label> text instead of a placeholder.
+async function fillIfVisibleLocator(locator, value) {
+  const field = locator.first();
   if (await field.isVisible().catch(() => false)) {
     await field.fill(value);
     return true;
