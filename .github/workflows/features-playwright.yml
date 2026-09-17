@@ -1,11 +1,11 @@
 name: NxtHire Features Suite (Allure Report)
 
 on:
-  workflow_dispatch:        # manual "Run workflow" button in GitHub Actions tab
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'tests/features.spec.js'
+      - 'tests/**.spec.js'
       - '.github/workflows/features-playwright.yml'
 
 jobs:
@@ -28,24 +28,18 @@ jobs:
       - name: Install Playwright (Chrome only)
         run: npx playwright install --with-deps chromium
 
-      - name: Confirm tests/features.spec.js is present
-        run: ls -la tests/features.spec.js && cat playwright.config.js
-
-      - name: Run tests/features.spec.js
+      - name: Run full 15-feature test suite
         env:
           NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
           NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
-        run: npx playwright test tests/features.spec.js
-        continue-on-error: true   # let the report publish even if some tests fail
+        run: npx playwright test
+        continue-on-error: true
 
       - name: Generate Allure report
         run: |
           npm install -g allure-commandline --save-dev
           allure generate allure-results --clean -o allure-report-features
 
-      # Publishes to a features/ subfolder so it never overwrites the
-      # existing openjobs/datasources report living at the repo root of
-      # the docs/ folder (https://reddy062023.github.io/nxthire-qa/).
       - name: Prepare docs/features folder for Pages
         run: |
           mkdir -p docs/features
