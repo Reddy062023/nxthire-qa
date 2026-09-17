@@ -1,143 +1,224 @@
-# NxtHire.ai — QA Automation Test Suite
+# \# NxtHire.ai — QA Automation Test Suite
 
-![Playwright](https://img.shields.io/badge/Playwright-45ba4b?style=for-the-badge&logo=playwright&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+# 
 
-**Company:** North Star Group Inc. (SDVOSB)  
-**Application:** NxtHire.ai — AI-powered recruiting platform built on the Anthropic Claude API  
-**Tester:** Japendra | **Developer:** Sundar | **Management:** Amit  
-**Test Period:** June 2026
+# Company: North Star Group Inc. (SDVOSB)
 
----
+# Application: NxtHire.ai — AI-powered recruiting platform built on the Anthropic Claude API
 
-## Why This Test Suite Was Written
+# Tester: Japendra | Developer: Sundar | Management: Amit
 
-NxtHire.ai is a new AI recruiting platform being built for North Star Group. As the application was being developed, there was no automated test coverage in place. This test suite was created to:
+# 
 
-- **Verify core functionality works correctly** before the platform is used by recruiters
-- **Catch bugs early** during active development so Sundar can fix them quickly
-- **Test the AI recruiter behavior** — both in normal AI mode and in keyword fallback mode when API credits are exhausted
-- **Provide management with clear evidence** that the platform has been tested and is ready for use
-- **Create a repeatable process** so the same tests can be run again after any code change to confirm nothing broke
+# \## Why This Test Suite Was Written
 
----
+# 
 
-## What Was Tested and Why
+# NxtHire.ai is a new AI recruiting platform being built for North Star Group. As the application was being developed, there was no automated test coverage in place. This test suite was created to:
 
-### AI Recruiter Module (`ai-recruiter.spec.js`)
+# 
 
-The AI Recruiter is the core feature of NxtHire.ai. Recruiters use it to search for candidates using natural language. These tests verify that the chat interface works, the AI responds correctly, and the system handles edge cases safely.
+# \- Verify core functionality works correctly before the platform is used by recruiters
 
-| Module | Why It Was Tested |
-|---|---|
-| **TC-01 Authentication** | Recruiters must log in securely. Invalid credentials must be rejected. Unauthenticated access must redirect to login. |
-| **TC-02 Dashboard UI** | All navigation items, the chat input, the online badge, and the billing banner must be visible and working before a recruiter can use the platform. |
-| **TC-05 Clear Chat** | Recruiters need to start fresh conversations. Clearing chat must work and new queries must still work after clearing. |
-| **TC-06 Prompts History** | The history panel lets recruiters replay past searches. This was tested to confirm queries are saved with timestamps and can be replayed. |
-| **TC-07 Navigation** | Every sidebar link must load the correct page. Broken navigation would prevent recruiters from reaching key pages. |
-| **TC-08 Billing Banner** | When Anthropic API credits run out the system falls back to keyword matching. The billing banner warns users about this. The dismiss button and settings link must work. |
-| **TC-09 Accessibility** | Keyboard navigation and responsive layout were tested to confirm the platform works on different screen sizes including mobile. |
+# \- Catch bugs early during active development so Sundar can fix them quickly
 
----
+# \- Test the AI recruiter behavior, both in normal AI mode and in keyword fallback mode when API credits are exhausted
 
-### Candidates Page (`candidates.spec.js`)
+# \- Provide management with clear evidence that the platform has been tested and is ready for use
 
-The Candidates page is where recruiters browse and search 80,533 candidate profiles. These tests verify that search, filters, pagination, and candidate actions all work correctly.
+# \- Create a repeatable process so the same tests can be run again after any code change to confirm nothing broke
 
-| Module | Why It Was Tested |
-|---|---|
-| **TC-11-A Page Load** | The page must load with data, show all filter dropdowns, and display the correct action buttons before a recruiter can work. |
-| **TC-11-B Search** | Search is the most used feature on the Candidates page. It was tested with names, skills, company names, partial words, case variations, and nonsense input to confirm it works correctly and handles edge cases. |
-| **TC-11-C Filters** | Recruiters filter candidates by location, source, status, and experience. These were tested individually and in combination to confirm filters narrow results correctly. |
-| **TC-11-D View Profile** | Recruiters click View to see full candidate details. The profile must open, show content, and allow the recruiter to go back to the list. |
-| **TC-11-E Export** | Recruiters export candidate data for reporting. The export button must trigger a file download. |
-| **TC-11-F Bulk Import** | Recruiters upload resumes in bulk. The import modal must open and accept supported file formats. |
-| **TC-11-G Ask Agent** | The Ask agent button lets recruiters move from the Candidates page to the AI Recruiter. It must navigate correctly. |
-| **TC-11-H Pagination** | With 80,533 candidates the page uses pagination. Per page options and page navigation must work so recruiters can browse all candidates. |
-| **TC-11-I Sort** | The sort control must be present so recruiters can order candidates by best match. |
+# 
 
----
+# \## Two Test Suites in This Repo
 
-## Test Files
+# 
 
-| File | Module | Tests |
-|---|---|---|
-| `ai-recruiter.spec.js` | AI Recruiter | 29 automated tests across 7 modules |
-| `candidates.spec.js` | Candidates Page | 29 automated tests across 9 modules |
+# This repo contains two generations of test coverage, written at different phases of the project.
 
----
+# 
 
-## Getting Started
+# \### 1. Root-level suite (Phase 1-2, June-July 2026)
 
-### Prerequisites
-- Node.js 18+
-- npm
+# 
 
-### Installation
+# Early smoke-test-style coverage of core platform mechanics, written before the platform's 15 features were fully defined.
 
-```bash
-git clone https://github.com/Reddy062023/nxthire-qa.git
-cd nxthire-qa
-npm install
-npx playwright install
-```
+# 
 
-### Set Up Credentials
+# \- ai-recruiter.spec.js - AI Recruiter chat interface (authentication, dashboard UI, clear chat, prompts history, navigation, billing banner, accessibility)
 
-Create a `.env` file in the root folder:
+# \- candidates.spec.js - Candidates page (page load, search, filters, view profile, export, bulk import, Ask agent, pagination, sort) across 80,000+ candidate profiles
 
-```
-NXTHIRE_EMAIL=your@email.com
-NXTHIRE_PASSWORD=yourpassword
-```
+# \- openjobs.spec.js - Open Jobs page
 
-> ⚠️ Never commit the `.env` file. It is already in `.gitignore`.
+# \- datasources.spec.js - Data Sources page
 
----
+# \- team.spec.js / team-capture.spec.js - Team management page
 
-## Running Tests
+# \- feature-audit.spec.js - General feature audit checks
 
-```bash
-# Run all tests
-npx playwright test ai-recruiter.spec.js candidates.spec.js --headed
+# 
 
-# Run AI Recruiter only
-npx playwright test ai-recruiter.spec.js --headed
+# Run these directly from the repo root, e.g.:
 
-# Run Candidates page only
-npx playwright test candidates.spec.js --headed
+# npx playwright test ai-recruiter.spec.js candidates.spec.js --headed
 
-# Run a specific module
-npx playwright test --grep "TC-01" --headed
+# 
 
-# Run Chrome only for speed
-npx playwright test --project=chromium --headed
-```
+# \### 2. tests/ folder suite (current, August 2026 onward)
 
----
+# 
 
-## Allure Report
+# Full functional coverage of all 15 core features of the platform, written feature-by-feature as each one was defined and built out. This is the actively maintained suite going forward.
 
-```bash
-npx allure generate allure-results --clean -o allure-report
-npx allure serve allure-results
-```
+# 
 
-🔗 **[View Live Report](https://reddy062023.github.io/nxthire-qa/)**
+# \- tests/feature1.spec.js through tests/feature15.spec.js - one standalone spec file per feature, each independently runnable
 
----
+# \- tests/auth.setup.js - shared login used by every feature spec
 
-## Phase Plan
+# \- tests/perf.spec.js - timing checks for login, Candidates, and Open Jobs page loads
 
-| Phase | Scope | Status |
-|---|---|---|
-| Phase 1 | AI Recruiter + Candidates Page | ✅ Complete |
-| Phase 2 | Open Jobs + Data Sources | 🔜 In Progress |
-| Phase 3 | AI mode testing (requires API credits) | ⏳ Pending |
+# \- tests/archive/ - retired monolithic all-in-one suite from early in this phase, kept for history only; not run
 
----
+# 
 
-## Author
+# Run these from inside tests/, e.g.:
 
-**Japendra** — QA Tester, North Star Group Inc. — June 2026
+# npx playwright test tests/feature7.spec.js --reporter=list
+
+# 
+
+# \## Feature Coverage (tests/ suite)
+
+# 
+
+# 1\. Create Candidate Manually - Complete
+
+# 2\. Parse Resume on Create - Complete (2 known extraction bugs documented in-suite)
+
+# 3\. Edit Candidate - Complete
+
+# 4\. Word Resume Download - Complete
+
+# 5\. Email Button and Templates - Complete
+
+# 6\. Verification Checklist and Duplicate Check - Complete
+
+# 7\. Jobs: Templates, Assignment, On-Hold - Complete
+
+# 8\. Requirements / Sales - Complete
+
+# 9\. Interviews and Placements - Complete
+
+# 10\. Vendors and Email Sequences - Complete
+
+# 11\. Application Pipeline - Partial, one test case only, see note below
+
+# 12\. Analytics and Reports - Complete
+
+# 13\. Hotlist Email - Complete
+
+# 14\. Sales CRM - Complete
+
+# 15\. Job Seeker Portal - Partial, pending design finalization on the share flow
+
+# 
+
+# Feature 11 note: the "Pick jobs \& apply" screen intermittently shows a false "No open jobs" state under fast automated interaction. This reproduces in automated testing but not under normal manual use. Only the Analytics-verification test case (TC-F11-03) is automated for this feature until that behavior is resolved.
+
+# 
+
+# \## Getting Started
+
+# 
+
+# Prerequisites: Node.js 18+, npm
+
+# 
+
+# git clone https://github.com/Reddy062023/nxthire-qa.git
+
+# cd nxthire-qa
+
+# npm install
+
+# npx playwright install
+
+# 
+
+# Create a .env file in the root folder:
+
+# 
+
+# NXTHIRE\_EMAIL=your@email.com
+
+# NXTHIRE\_PASSWORD=yourpassword
+
+# 
+
+# Never commit the .env file. It is already in .gitignore.
+
+# 
+
+# \## Running Tests
+
+# 
+
+# Root-level legacy suite:
+
+# npx playwright test ai-recruiter.spec.js candidates.spec.js --headed
+
+# npx playwright test --grep "TC-01" --headed
+
+# npx playwright test --project=chromium --headed
+
+# 
+
+# Current feature suite:
+
+# npx playwright test tests/feature7.spec.js --reporter=list
+
+# npx playwright test --reporter=list
+
+# 
+
+# \## Allure Report
+
+# 
+
+# npx allure generate allure-results --clean -o allure-report
+
+# npx allure serve allure-results
+
+# 
+
+# \## Known Open Issues
+
+# 
+
+# See the latest consolidated test results document for the full list of known bugs and their current status.
+
+# 
+
+# \## Phase Plan
+
+# 
+
+# Phase 1: AI Recruiter + Candidates Page - Complete
+
+# Phase 2: Open Jobs + Data Sources - Complete
+
+# Phase 3: All 15 platform features (tests/ suite) - Complete, ongoing maintenance
+
+# Phase 4: Job Seeker Portal completion - Pending design finalization
+
+# 
+
+# \## Author
+
+# 
+
+# Japendra — QA Tester, North Star Group Inc.
+
