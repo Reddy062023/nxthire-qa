@@ -1,0 +1,9 @@
+[login] no active session found — logging in via form (fallback)
+[login] on login page: https://nxthire.ai/login
+[login] email configured: yes (vis***)
+[login] password configured: yes
+[login] after submit, url: https://nxthire.ai/dashboard
+[login] confirmed logged in, url: https://nxthire.ai/candidates
+[openFirstCandidate] Did not land on candidate detail page (attempt 1), retrying...
+[openFirstCandidate] Did not land on candidate detail page (attempt 2), retrying...
+[openFirstCandidate] WARNING: could not confirm candidate detail page after 2 attempts.

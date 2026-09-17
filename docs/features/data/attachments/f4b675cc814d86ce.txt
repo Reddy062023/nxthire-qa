@@ -1,0 +1,3 @@
+[TC-F07-05] First "active/on_hold/filled/closed" select current value: filled
+[TC-F07-05] Status after selecting on_hold: on_hold
+[TC-F07-05] Jobs ON HOLD count on Analytics: 2
