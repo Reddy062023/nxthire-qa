@@ -2,6 +2,11 @@ name: NxtHire Features Suite (Allure Report)
 
 on:
   workflow_dispatch:
+    inputs:
+      test_pattern:
+        description: 'Optional: only run tests matching this pattern (leave blank for full suite)'
+        required: false
+        default: ''
   push:
     branches: [main]
     paths:
@@ -32,7 +37,7 @@ jobs:
         env:
           NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
           NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
-        run: npx playwright test
+        run: npx playwright test ${{ github.event.inputs.test_pattern && format('-g "{0}"', github.event.inputs.test_pattern) || '' }}
         continue-on-error: true
 
       - name: Re-run only failed tests
