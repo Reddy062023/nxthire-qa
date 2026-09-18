@@ -35,6 +35,13 @@ jobs:
         run: npx playwright test
         continue-on-error: true
 
+      - name: Re-run only failed tests
+        env:
+          NXTHIRE_EMAIL: ${{ secrets.NXTHIRE_EMAIL }}
+          NXTHIRE_PASSWORD: ${{ secrets.NXTHIRE_PASSWORD }}
+        run: npx playwright test --last-failed
+        continue-on-error: true
+
       - name: Generate Allure report
         run: |
           npm install -g allure-commandline --save-dev
