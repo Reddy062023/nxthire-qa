@@ -1,0 +1,3 @@
+[TC-F07-04] Assigned ID before reload: 01KR77GHSWAYCFYVE0K3MZBJ5W
+[TC-F07-04] Assigned ID after reload: 01KR77GHSWAYCFYVE0K3MZBJ5W
+[TC-F07-04] Selected option label after reload: Sundar N

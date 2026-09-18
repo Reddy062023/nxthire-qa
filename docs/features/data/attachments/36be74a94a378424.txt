@@ -1,0 +1,1 @@
+[TC-F01-02] Years field value after typing letters: ""

@@ -1,0 +1,1 @@
+[TC-F12-02] Page still shows valid analytics data after clicking "30 days": true

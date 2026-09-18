@@ -1,0 +1,1 @@
+[TC-F11-03] Qualified: false | Offers Extended: false
