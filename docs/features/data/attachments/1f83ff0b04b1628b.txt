@@ -1,0 +1,3 @@
+[TC-F12-06] Jobs FILLED count before: 6
+[TC-F12-06] Jobs FILLED count after: 7
+[TC-F12-06] AVG DAYS TO FILL value present: 100.9

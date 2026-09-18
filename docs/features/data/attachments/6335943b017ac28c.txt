@@ -1,0 +1,3 @@
+[TC-F09-03] Placements this week before: 4
+[TC-F09-03] Placements this week after: 5
+[TC-F09-03] New placement entry found: true
