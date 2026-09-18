@@ -1,0 +1,3 @@
+[TC-F06-02] First checklist checkbox initial state: true
+[TC-F06-02] Strikethrough style before reload: none
+[TC-F06-02] First checklist checkbox state after reload: true

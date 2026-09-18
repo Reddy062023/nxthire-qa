@@ -1,2 +1,0 @@
-[TC-F14-01] Total input fields in Add company modal: 8
-[TC-F14-01] Total input fields after Add contact: 12

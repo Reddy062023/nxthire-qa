@@ -1,4 +1,0 @@
-[TC-F09-04] Interviews tab count: 17
-[TC-F09-04] Placements tab count: 7
-[TC-F09-04] Analytics "Interviews arranged" count: 17
-[TC-F09-04] Analytics "Placements" count: 7

@@ -1,0 +1,3 @@
+[TC-F14-05] Fresh task entry visible: true
+[TC-F14-05] Task row (exactly 1 button inside) found: true
+[TC-F14-05] Strikethrough detected on task text: true

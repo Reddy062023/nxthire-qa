@@ -1,0 +1,3 @@
+[createVerifiedCandidate] Verified on attempt 1: "QA F11 T01 1789751851378"
+[applyToJob] Waiting up to 60s for "Data Science Engineer" to appear...
+[applyToJob] "Data Science Engineer" already applied — using existing application.
