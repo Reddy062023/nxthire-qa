@@ -1,3 +1,0 @@
-[TC-F07-03] Available templates: Start from template… | Java Dev Template | QA Test Template 1785811695100 | QA Test Template 1785812306683 | QA Test Template 1785812445479 | QA Test Template 1785936323959 | QA Test Template 1789681726682 | QA Test Template 1789693778233 | QA Test Template 1789735719398 | QA Test Template 1789738579899 | QA Test Template 1789747474813 | QA Test Template 1789752983396 | QA Test Template 1789756038569 | QA Test Template 1789758579304 | Run3 Comp Test Template
-[TC-F07-03] COMP field value: "—"
-[TC-F07-03] COMP field is empty: true

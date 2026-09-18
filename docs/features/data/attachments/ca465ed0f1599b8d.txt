@@ -1,3 +1,0 @@
-[TC-F14-04] Activity modal confirmed open: true
-[TC-F14-04] Due-date field visible for Task: true
-[TC-F14-04] Call logged: true | Email logged: true | Task logged: true

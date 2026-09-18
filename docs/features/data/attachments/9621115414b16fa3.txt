@@ -1,1 +1,0 @@
-[TC-F10-01] Vendor found after creation: true

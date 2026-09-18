@@ -1,2 +1,0 @@
-[TC-F01-04] Education card snippet: Education ~ B.S. Computer Science, MIT, 2015 ~ Duplicate submission check ~ Check ~ Flags other profiles with the same email/name, plus existing submissions, 
-[TC-F01-04] Degree/institution/year info present: true

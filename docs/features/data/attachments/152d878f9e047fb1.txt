@@ -1,3 +1,0 @@
-[TC-F08-03] URL after convert (should be a job detail page): https://nxthire.ai/jobs/01M2TZBMP545D1M60VYPETCJ16
-[TC-F08-03] Salary/rate carried over to job page: true
-[TC-F08-03] Description/notes carried over to job page: true

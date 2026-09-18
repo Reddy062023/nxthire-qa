@@ -1,1 +1,0 @@
-[TC-F10-02] Grouped view shows "Sundar N" heading: true

@@ -1,2 +1,0 @@
-[seeker_register] fields: 7
-Seeker report written to audit-output/edge-case-inventory-seeker.json

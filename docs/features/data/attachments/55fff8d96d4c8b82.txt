@@ -1,3 +1,0 @@
-[TC-F10-04] Literal {{vendor_contact}} present: false
-[TC-F10-04] Literal {{vendor_name}} present: false
-[TC-F10-04] Literal {{recruiter_name}} present: false

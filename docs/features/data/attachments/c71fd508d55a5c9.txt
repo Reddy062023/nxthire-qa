@@ -1,4 +1,0 @@
-[TC-F14-06] Pipeline Value before: null
-[TC-F14-06] Status selects with "won" option found: 48
-[TC-F14-06] Pipeline Value after: null
-[TC-F14-06] Could not parse Pipeline Value — logging only.

@@ -1,4 +1,0 @@
-[setBenchStatus] "Sofia Ramirez" set to bench and saved.
-[verifyBenchStatus] "Sofia Ramirez" status value: bench
-[setBenchStatus] "David Okafor" set to bench and saved.
-[verifyBenchStatus] "David Okafor" status value: bench

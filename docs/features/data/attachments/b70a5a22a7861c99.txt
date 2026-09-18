@@ -1,2 +1,0 @@
-[TC-F08-02] Status before: new
-[TC-F08-02] Status after: working

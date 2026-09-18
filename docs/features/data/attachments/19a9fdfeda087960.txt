@@ -1,4 +1,0 @@
-[registerSeeker] Input field count on /seeker-register: 6
-[registerSeeker] Server error on first attempt: false
-[TC-F15-04] Blocked from /candidates: true | URL: https://nxthire.ai/login
-[TC-F15-04] Blocked from /crm: true | URL: https://nxthire.ai/login

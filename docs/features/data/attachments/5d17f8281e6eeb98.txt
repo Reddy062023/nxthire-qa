@@ -1,1 +1,0 @@
-[TC-F02-07] All field values: ["","Aman Singh","Samson Software Solutions","amanss12345@gmail.com","(111) 222-0000","","","12","Inc.","Local DB","Snowflake, Power Bi, Jenkins, Python, Azure, Kafka, Spark, Ci/Cd, Node, SQL, RAG, Go","","",""]

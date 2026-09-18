@@ -1,1 +1,0 @@
-[selectTemplateAndWait] Attempt 1: subject value = "japendra@nstargroupinc.com"
