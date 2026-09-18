@@ -1,4 +1,0 @@
-[TC-F08-04] URL after convert: https://nxthire.ai/jobs/01M2TX4T63CAYVJ688QKBNGKPH
-[TC-F08-04] Card text after first convert (back on Requirements list): QA NoDouble Convert Test 1789756855304 ~ converted ~ urgent ~ QA Test Client · $120/hr · from Sundar N · 2026-09-18 ~ QA double-convert prevention test. ~ View job ~ QA Convert Test 1789756118683 ~ converted ~ urgent ~ QA Test Client · $137/hr · from Sundar N · 2026-09-18 ~ QA_CONVERT_MARKER unique description text for
-[TC-F08-04] "Convert to job" still present (should be false): false
-[TC-F08-04] "View job" now present (should be true): true

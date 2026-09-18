@@ -1,5 +1,0 @@
-[TC-F01-01] URL after create: https://nxthire.ai/candidates/01M2TVBBQKWYSG3NY6Q905229C
-[TC-F01-01] Landed on candidate detail page: true
-[TC-F01-01] Education card present: true
-[TC-F01-01] Social links card present: true
-[TC-F01-01] References card present: true

@@ -1,0 +1,4 @@
+[TC-F12-03] RESUMES INDEXED before custom range: 81,295
+[TC-F12-03] Date input count: 2
+[TC-F12-03] RESUMES INDEXED after custom range + Apply: 733
+[TC-F12-03] Data value changed after applying custom range: true

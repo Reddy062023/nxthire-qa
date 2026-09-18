@@ -1,3 +1,0 @@
-[TC-F09-01] Interviews this week before: 7
-[TC-F09-01] Interviews this week after: 8
-[TC-F09-01] New interview entry found: true

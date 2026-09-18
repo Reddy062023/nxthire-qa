@@ -1,0 +1,4 @@
+[TC-F09-02] Correctly-scoped pencil index: 9
+[TC-F09-02] Edit modal opened for the correct candidate: true
+[TC-F09-02] Row text after edit: QA Edit Test 1789758670223 ~ 2026-09-18 ~ QA Test Client ~ QA Manager ~ $100/hr ~ scheduled ~ QA Edit Test 1789681966979 ~ 2026-09-17 ~ QA Test Client ~ QA Manager ~ $100/hr ~ passed ~ QA Test Candidate 1785936402344 ~ 2026-08
+[TC-F09-02] Outcome now shows "passed": true

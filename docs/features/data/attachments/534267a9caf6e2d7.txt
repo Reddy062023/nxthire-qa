@@ -1,0 +1,3 @@
+[TC-F08-01] New requirement card text: QA Test Requirement 1789758643557 ~ new ~ urgent ~ QA Test Client · $95/hr · from Sundar N · 2026-09-18 ~ QA automated test requirement description. ~ new ~ working ~ closed ~ Convert to job ~ QA NoDouble Convert Test 1789756855304 ~ converted ~ urgent ~ QA Test Client · $120/hr · from Sundar N · 2026-09-18 ~ QA double-conve
+[TC-F08-01] Shows urgent badge: true
+[TC-F08-01] Shows submitter name: true
