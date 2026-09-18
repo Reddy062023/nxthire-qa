@@ -1,0 +1,21 @@
+[TC-F05-05] Template options after reopen: [
+  'Apply a template…',
+  'NxtHire — Candidate outreach',
+  'NxtHire — Candidate follow-up',
+  'NxtHire — Bench hotlist',
+  'NxtHire — Vendor introduction',
+  'NxtHire — Vendor follow-up',
+  'Custom Template Test - TC-F05-05',
+  'QA Automation Template 1785531543883',
+  'QA Automation Template 1785531997722',
+  'QA Automation Template 1785532020726',
+  'QA Automation Template 1785532601890',
+  'QA Automation Template 1785532842593',
+  'QA Automation Template 1785936327830',
+  'QA Automation Template 1789693756287',
+  'QA Automation Template 1789735703943',
+  'QA Automation Template 1789738245378',
+  'QA Automation Template 1789747079383',
+  'QA Automation Template 1789752959709',
+  'QA Manual Template Test'
+]

@@ -1,0 +1,1 @@
+[TC-F02-04] All field values: ["","Unknown","Kroger","nstarqatest2@gmail.com","222-222-2222","","","15","Cincinnati, OH","Local DB","Microservices, Scikit-Learn, Spring Boot, Kubernetes, Typescript, Javascript, Selenium, Mongodb, Jenkins, Docker, Python, Pandas","","",""]

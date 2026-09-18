@@ -1,0 +1,2 @@
+[TC-F12-01] APPS THIS WEEK before: (not found)
+[TC-F12-01] Page still shows valid analytics data after clicking "7 days": false

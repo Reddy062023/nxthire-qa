@@ -1,0 +1,52 @@
+[TC-F13-04] Modal text before send (first 500 chars): …
+AI AGENT
+AI Agent
+NEW
+RECRUIT
+Candidates
+Open jobs
+Interviews
+SALES
+Sales CRM
+Requirements
+Vendors
+CONFIGURE
+Data sources
+Monster
+Indeed
+TheirStack
+Ceipal
+Templates
+Onboarding
+INSIGHTS
+Analytics
+MANAGE
+Team
+Settings
+SN
+Sundar N
+/candidates
+Candidates
+Loading… 17.0s
+Export
+Bulk import
+New candidate
+Hotlist
+Ask agent
+All locations
+All experience
+0–2 Years
+3–5 Years
+6–8 Years
+9–12 Years
+13–15 Years
+15+ Years
+All statuses (0)
+All sources (81,281)
+Ceipal (81196)
+Local DB (85)
+Sort: best match
+CANDI
+[TC-F13-04] {{hotlist}} shown as literal template text (expected/correct): true
+[TC-F13-04] {{recruiter_name}} literal in compose box (informational only): false
+[TC-F13-04] {{agency_name}} literal in compose box (informational only): false

@@ -1,0 +1,8 @@
+[TC-F06-03] Clicked Check — this can take over 60s, waiting up to 90s...
+[TC-F06-03] Result snippet: Duplicate submission check
+Check
+No duplicate profiles or prior submissions found.
+Video interview & verification
+Steps to complete before moving this candidate forward.
+Video interview completed
+Iden

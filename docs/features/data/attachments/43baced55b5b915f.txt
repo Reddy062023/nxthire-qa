@@ -1,0 +1,1 @@
+[TC-F01-05] LinkedIn clickable link found: false

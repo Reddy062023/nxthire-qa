@@ -1,0 +1,3 @@
+[registerSeeker] Input field count on /seeker-register: 6
+[registerSeeker] Server error on first attempt: false
+[TC-F15-11] Share requests section: true | Connected agencies section: true

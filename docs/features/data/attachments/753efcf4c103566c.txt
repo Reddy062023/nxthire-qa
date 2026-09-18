@@ -1,0 +1,3 @@
+[TC-F07-01] Waiting up to 30s for parsing to complete...
+[TC-F07-01] Extracted fields section: Claude's extracted fields ~ done ~ ROLE ~ Senior Rust Backend Engineer ~ COMPANY ~ LOCATION ~ Austin, TX ~ WORK MODEL ~ Hybrid ~ SENIORITY ~ Senior ~ COMP ~ $180,000-$220,000 ~ MUST-HAVE SKILLS ~ Rust ~ Kubernetes ~ QA ~ CLAUDE'S 1-LINE SUMMARY ~ Senior Rust Backend Engineer in Austin, TX — key skills: Rust, Kubernetes, QA. (Parsed without AI — review fields before publishing.) ~ Hiring contact email (optional) ~ When a candidate applies to this role, the cover letter is emailed here using your agency's SMTP credentials. Leave blank to skip. ~ Save as template ~ Publish requisition
+[TC-F07-01] Extracted fields section reflects the real pasted JD: true
