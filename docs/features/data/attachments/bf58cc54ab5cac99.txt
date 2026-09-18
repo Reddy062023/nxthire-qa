@@ -1,0 +1,1 @@
+[auth.setup] Saved authenticated session to playwright/.auth/user.json

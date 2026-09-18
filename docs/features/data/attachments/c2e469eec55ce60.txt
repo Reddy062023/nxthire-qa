@@ -1,4 +1,0 @@
-[selectTemplateAndWait] Attempt 1: subject value = "Opportunity that matches your background"
-[TC-F05-04] Subject confirmed before send: Opportunity that matches your background
-[TC-F05-04] Saw "Sent to" confirmation: true
-[TC-F05-04] Saw "Failed to fetch" error: false

@@ -1,0 +1,6 @@
+[registerSeeker] Input field count on /seeker-register: 6
+[registerSeeker] Server error on first attempt: true
+[TC-F15-02] First registration landed on: https://nxthire.ai/seeker-register
+[registerSeeker] Input field count on /seeker-register: 6
+[registerSeeker] Server error on first attempt: true
+[TC-F15-02] Duplicate attempt rejected (stayed on register or showed error): true

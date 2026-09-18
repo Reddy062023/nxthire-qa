@@ -1,0 +1,2 @@
+[registerSeeker] Input field count on /seeker-register: 6
+[registerSeeker] Server error on first attempt: true

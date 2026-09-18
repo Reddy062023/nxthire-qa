@@ -1,0 +1,5 @@
+[TC-F07-02] Waiting up to 30s for parsing...
+[TC-F07-02] Save as template checkbox visible: true
+[TC-F07-02] Template name field visible after checking box: true
+[TC-F07-02] Templates available after save: Start from template… | Java Dev Template | QA Test Template 1785811695100 | QA Test Template 1785812306683 | QA Test Template 1785812445479 | QA Test Template 1785936323959 | QA Test Template 1789681726682 | QA Test Template 1789693778233 | QA Test Template 1789735719398 | QA Test Template 1789738579899 | QA Test Template 1789747474813 | QA Test Template 1789752983396 | QA Test Template 1789756038569 | Run3 Comp Test Template
+[TC-F07-02] New template found in dropdown: true
