@@ -1,0 +1,2 @@
+[TC-F12-05] "Per recruiter" section present: false
+[TC-F12-05] Logged-in recruiter (Sundar N) row present: false

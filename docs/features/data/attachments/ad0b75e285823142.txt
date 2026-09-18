@@ -1,0 +1,4 @@
+[registerSeeker] Input field count on /seeker-register: 6
+[registerSeeker] Server error on first attempt: true
+[TC-F15-01] Landed on seeker portal: https://nxthire.ai/seeker-register
+[TC-F15-01] Registered email visible on dashboard: false
