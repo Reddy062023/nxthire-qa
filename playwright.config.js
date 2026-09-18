@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: ['**/archive/**'],
   timeout: 60000,
   retries: 1,
   reporter: [['list'], ['allure-playwright']],
